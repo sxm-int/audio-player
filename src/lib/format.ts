@@ -1,5 +1,7 @@
 export function formatTime(sec?: number) {
-	if (sec == null || !isFinite(sec)) return 'LIVE';
+	if (sec === null || sec === undefined || !isFinite(sec)) {
+		return 'LIVE';
+	}
 	const s = Math.floor(sec % 60)
 		.toString()
 		.padStart(2, '0');
