@@ -13,6 +13,16 @@ import {
 	setIsLive,
 } from '../store';
 
+// Toggle debug logs here
+const DEBUG_LOGGING = false;
+
+// Simple logger that only outputs if DEBUG_LOGGING is true
+const debug = (...args: unknown[]) => {
+	if (DEBUG_LOGGING) {
+		console.debug('[hls]', ...args);
+	}
+};
+
 const HlsAudio: React.FC = () => {
 	const { url, muted, volume } = useAppSelector((s) => s.player);
 	const dispatch = useAppDispatch();
@@ -32,7 +42,6 @@ const HlsAudio: React.FC = () => {
 		const audio = audioRef.current;
 		if (!audio) return;
 
-		// fresh instance
 		if (hlsRef.current) {
 			hlsRef.current.destroy();
 			hlsRef.current = null;
@@ -41,27 +50,20 @@ const HlsAudio: React.FC = () => {
 		dispatch(setStatus('loading'));
 		dispatch(setError(undefined));
 
-		// Helpful for CORS + dev tools
 		audio.crossOrigin = 'anonymous';
 
-		// hls.js tuning for smoother audio
 		const config: Partial<HlsConfig> = {
 			enableWorker: true,
-			// For standard HLS (not LL-HLS); stay comfortably behind live edge:
 			lowLatencyMode: false,
-			liveSyncDuration: 8, // seconds behind live edge
+			liveSyncDuration: 8,
 			liveMaxLatencyDuration: 30,
-			// Build a deeper buffer for audio
-			maxBufferLength: 120, // seconds of media to buffer
-			maxBufferSize: 60 * 1000 * 1000, // ~60MB cap
-			backBufferLength: 120, // keep some history
-			// Be aggressive about tiny gaps
+			maxBufferLength: 120,
+			maxBufferSize: 60 * 1000 * 1000,
+			backBufferLength: 120,
 			maxBufferHole: 0.1,
-			// Retry settings
 			fragLoadingMaxRetry: 6,
 			manifestLoadingMaxRetry: 3,
 			levelLoadingMaxRetry: 3,
-			// Start at auto level
 			startLevel: -1,
 		};
 
@@ -73,7 +75,7 @@ const HlsAudio: React.FC = () => {
 				.then(() => dispatch(setStatus('ready')))
 				.catch((err) => {
 					console.error('Audio play failed:', err);
-					dispatch(setStatus('ready')); // media ready, playback gated by policy
+					dispatch(setStatus('ready'));
 				});
 		} else if (Hls.isSupported()) {
 			const hls = new Hls(config);
@@ -91,20 +93,17 @@ const HlsAudio: React.FC = () => {
 				});
 			});
 
-			// Visibility into buffering
-			const log = (...args: unknown[]) => console.debug('[hls]', ...args);
 			hls.on(Events.FRAG_LOADING, (_e, data) =>
-				log('FRAG_LOADING', data?.frag?.sn),
+				debug('FRAG_LOADING', data?.frag?.sn),
 			);
 			hls.on(Events.FRAG_BUFFERED, (_e, data) =>
-				log('FRAG_BUFFERED', data?.frag?.sn),
+				debug('FRAG_BUFFERED', data?.frag?.sn),
 			);
 			hls.on(Events.LEVEL_UPDATED, (_e, data) =>
-				log('LEVEL_UPDATED', data?.details?.totalduration),
+				debug('LEVEL_UPDATED', data?.details?.totalduration),
 			);
 
 			hls.on(Events.ERROR, (_evt, data) => {
-				// Always log; never swallow
 				console.error('HLS error:', data);
 
 				if (data.fatal) {
@@ -122,10 +121,8 @@ const HlsAudio: React.FC = () => {
 					return;
 				}
 
-				// Non-fatal stalls/gaps -> try gentle nudges
 				if (data.details === ErrorDetails.BUFFER_STALLED_ERROR) {
 					try {
-						// Small nudge forward helps skip over tiny decode gaps
 						audio.currentTime = audio.currentTime + 0.05;
 					} catch (err) {
 						console.warn('Nudge on stall failed:', err);
@@ -151,7 +148,6 @@ const HlsAudio: React.FC = () => {
 		};
 	}, [url, canUseNativeHls, dispatch]);
 
-	// Mirror element -> Redux
 	useEffect(() => {
 		const a = audioRef.current;
 		if (!a) return;
@@ -169,9 +165,9 @@ const HlsAudio: React.FC = () => {
 			const live = !isFinite(a.duration) || a.duration > 24 * 3600;
 			dispatch(setIsLive(live));
 		};
-		const onWaiting = () => console.warn('[audio] waiting (buffering)');
-		const onStalled = () => console.warn('[audio] stalled');
-		const onProgress = () => console.debug('[audio] progress');
+		const onWaiting = () => debug('[audio] waiting (buffering)');
+		const onStalled = () => debug('[audio] stalled');
+		const onProgress = () => debug('[audio] progress');
 
 		a.addEventListener('play', onPlay);
 		a.addEventListener('pause', onPause);
@@ -196,7 +192,6 @@ const HlsAudio: React.FC = () => {
 		};
 	}, [dispatch]);
 
-	// Redux -> element
 	useEffect(() => {
 		const a = audioRef.current;
 		if (!a) return;
