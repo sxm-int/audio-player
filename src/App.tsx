@@ -70,7 +70,6 @@ const App: React.FC = () => {
 					value={tempUrl}
 					onChange={(e) => setTempUrl(e.target.value)}
 					required
-					pattern="https?://.*\\.m3u8(\\?.*)?$"
 				/>
 				<button type="submit">Load</button>
 			</form>
