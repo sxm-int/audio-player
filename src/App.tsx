@@ -3,6 +3,7 @@ import { useAppDispatch, useAppSelector } from './hooks';
 import { setUrl, setCurrentTime, setRequestedTime } from './store';
 import HlsAudio from './components/HlsAudio';
 import Controls from './components/Controls';
+import { MockDemo } from './components/MockDemo';
 
 const App: React.FC = () => {
 	const dispatch = useAppDispatch();
@@ -93,6 +94,8 @@ const App: React.FC = () => {
 					</li>
 				</ul>
 			</details>
+
+			<MockDemo />
 		</div>
 	);
 };
