@@ -13,14 +13,9 @@ import {
 	setIsLive,
 } from '../store';
 
-// Toggle debug logs here
 const DEBUG_LOGGING = false;
-
-// Simple logger that only outputs if DEBUG_LOGGING is true
 const debug = (...args: unknown[]) => {
-	if (DEBUG_LOGGING) {
-		console.debug('[hls]', ...args);
-	}
+	if (DEBUG_LOGGING) console.debug('[hls]', ...args);
 };
 
 const HlsAudio: React.FC = () => {
@@ -60,12 +55,16 @@ const HlsAudio: React.FC = () => {
 			maxBufferLength: 120,
 			maxBufferSize: 60 * 1000 * 1000,
 			backBufferLength: 120,
-			maxBufferHole: 0.1,
+			jumpLargeGaps: true,
+			maxBufferHole: 0.5,
+			nudgeOffset: 0.1,
+			nudgeMaxRetry: 5,
 			fragLoadingMaxRetry: 6,
 			manifestLoadingMaxRetry: 3,
 			levelLoadingMaxRetry: 3,
 			startLevel: -1,
-		};
+			debug: false,
+		} as Partial<HlsConfig> & Record<string, unknown>; // recast to fix outdated type defs
 
 		if (canUseNativeHls) {
 			audio.src = url;
@@ -82,8 +81,34 @@ const HlsAudio: React.FC = () => {
 			hlsRef.current = hls;
 			hls.attachMedia(audio);
 
+			let didInitialSeekFromLevel = false;
+
 			hls.on(Events.MEDIA_ATTACHED, () => {
 				hls.loadSource(url);
+			});
+
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
+			hls.on(Events.LEVEL_LOADED, (_e, data: any) => {
+				if (didInitialSeekFromLevel) return;
+				try {
+					const details = data?.details;
+					const fragStart =
+						details?.fragments?.[0]?.start ??
+						details?.start ??
+						details?.fragmentStart ??
+						null;
+
+					if (typeof fragStart === 'number' && Number.isFinite(fragStart)) {
+						const target = Math.max(0, fragStart + 0.05);
+						if (audio.currentTime < target - 0.01) {
+							audio.currentTime = target;
+							didInitialSeekFromLevel = true;
+							debug('Initial seek from LEVEL_LOADED to', target);
+						}
+					}
+				} catch (err) {
+					console.warn('LEVEL_LOADED initial seek failed:', err);
+				}
 			});
 
 			hls.on(Events.MANIFEST_PARSED, () => {
@@ -152,6 +177,25 @@ const HlsAudio: React.FC = () => {
 		const a = audioRef.current;
 		if (!a) return;
 
+		let didInitialNudge = false;
+
+		const nudgeIntoBuffered = () => {
+			if (didInitialNudge) return;
+			try {
+				const s = a.seekable;
+				if (s && s.length > 0) {
+					const start = s.start(0);
+					if (Number.isFinite(start) && a.currentTime < start - 0.01) {
+						a.currentTime = start + 0.05;
+						didInitialNudge = true;
+						debug('Initial nudge to', a.currentTime);
+					}
+				}
+			} catch (err) {
+				console.warn('Initial gap adjust failed:', err);
+			}
+		};
+
 		const onPlay = () => dispatch(setPlaying(true));
 		const onPause = () => dispatch(setPlaying(false));
 		const onDuration = () =>
@@ -164,8 +208,12 @@ const HlsAudio: React.FC = () => {
 		const onLoadedMeta = () => {
 			const live = !isFinite(a.duration) || a.duration > 24 * 3600;
 			dispatch(setIsLive(live));
+			nudgeIntoBuffered();
 		};
-		const onWaiting = () => debug('[audio] waiting (buffering)');
+		const onWaiting = () => {
+			debug('[audio] waiting (buffering)');
+			nudgeIntoBuffered();
+		};
 		const onStalled = () => debug('[audio] stalled');
 		const onProgress = () => debug('[audio] progress');
 
