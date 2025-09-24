@@ -64,7 +64,7 @@ const HlsAudio: React.FC = () => {
 			levelLoadingMaxRetry: 3,
 			startLevel: -1,
 			debug: false,
-		} as Partial<HlsConfig> & Record<string, unknown>;
+		} as Partial<HlsConfig> & Record<string, unknown>; // recast to fix outdated type defs
 
 		if (canUseNativeHls) {
 			audio.src = url;
