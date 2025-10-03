@@ -23,6 +23,8 @@ async function startMSW() {
 			serviceWorker: { url: absUrl, options: { scope: base || '/' } },
 			onUnhandledRequest: 'bypass',
 		});
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		(window as any).__MSW_READY__ = true;
 	} catch (e) {
 		console.warn(
 			'MSW start failed with absolute URL, retrying with relative…',
