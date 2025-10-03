@@ -1,19 +1,28 @@
+import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { Provider } from 'react-redux';
 import { store } from './store';
 import App from './App';
-import './App.css'; // add this line (keep index.css too if you use it)
+import './App.css';
 
-async function deferRender() {
-	const { mockServiceWorker } = await import('./mocks/browser');
+async function bootstrap() {
+	// Start MSW explicitly with a fixed URL so it works in StackBlitz iframes.
+	if (import.meta.env.DEV && 'serviceWorker' in navigator) {
+		const { worker } = await import('./mocks/browser');
+		const swUrl = new URL('/mockServiceWorker.js', window.location.origin).href;
+		await worker.start({
+			serviceWorker: { url: swUrl, options: { scope: '/' } },
+			onUnhandledRequest: 'bypass',
+		});
+	}
 
-	return mockServiceWorker.start();
+	ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
+		<React.StrictMode>
+			<Provider store={store}>
+				<App />
+			</Provider>
+		</React.StrictMode>,
+	);
 }
 
-deferRender().then(() => {
-	ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
-		<Provider store={store}>
-			<App />
-		</Provider>,
-	);
-});
+bootstrap();
