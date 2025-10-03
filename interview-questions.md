@@ -2,8 +2,6 @@
 
 Your interviewer will choose a selection of questions for you from the following categories and difficulty levels.
 
-## Categories
-
 ### Content
 
 These questions relate to the streams content that is loaded into the playlist.
