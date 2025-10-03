@@ -28,9 +28,9 @@ These questions relate to design, layout, and CSS styling.
 
 #### Hard
 
----
-
 1. Implement a styling library of your choice and use it to style a component.
+
+---
 
 ### Content
 
