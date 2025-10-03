@@ -3,7 +3,6 @@ import { useAppDispatch, useAppSelector } from './hooks';
 import { setUrl, setCurrentTime, setRequestedTime } from './store';
 import HlsAudio from './components/HlsAudio';
 import Controls from './components/Controls';
-import { MockDemo } from './components/MockDemo';
 import Visualizer from './components/Visualizer';
 import './App.css';
 

@@ -34,6 +34,7 @@ const Visualizer: React.FC<Props> = ({
 		if (!ctxRef.current) {
 			try {
 				ctxRef.current = new (window.AudioContext ||
+					// eslint-disable-next-line @typescript-eslint/no-explicit-any
 					(window as any).webkitAudioContext)();
 			} catch (err) {
 				console.error('AudioContext init failed:', err);
