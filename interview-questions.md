@@ -14,6 +14,8 @@ These questions relate to the streams content that is loaded into the playlist.
 
 #### Hard
 
+---
+
 ### UI
 
 These questions relate to design, layout, and CSS styling.
@@ -28,6 +30,8 @@ These questions relate to design, layout, and CSS styling.
 
 #### Hard
 
+---
+
 1. Implement a styling library of your choice and use it to style a component.
 
 ### Content
@@ -37,6 +41,8 @@ These questions relate to design, layout, and CSS styling.
 #### Medium
 
 #### Hard
+
+---
 
 ### Playback
 
@@ -49,6 +55,8 @@ These questions relate the audio player and playlist functionality.
 1. Add a left and right arrows in the playback controls to skip to the next song in the playlist.
 
 #### Hard
+
+---
 
 ### Architecture
 
