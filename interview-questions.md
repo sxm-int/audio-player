@@ -28,16 +28,6 @@ These questions relate to design, layout, and CSS styling.
 
 1. Implement a styling library of your choice and use it to style a component.
 
-## Content
-
-### Easy
-
-### Medium
-
-### Hard
-
-## Playback
-
 These questions relate the audio player and playlist functionality.
 
 ### Easy
