@@ -1,6 +1,4 @@
 // src/components/Visualizer.tsx
-// Medium 1
-// import React, { useEffect, useRef, memo } from 'react';
 import React, { useEffect, useRef } from 'react';
 
 type Props = {
@@ -194,6 +192,4 @@ const Visualizer: React.FC<Props> = ({
 	return <canvas ref={canvasRef} className="viz-canvas" style={{ height }} />;
 };
 
-// Medium 1
 export default Visualizer;
-// export default memo(Visualizer);

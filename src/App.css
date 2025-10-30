@@ -191,23 +191,12 @@ body {
 	border: 1px solid var(--line);
 	background: var(--panel-2);
 	border-radius: 16px;
-  /* Easy 1 */
-	/* padding: 14px; */
 	box-shadow: var(--shadow);
 	max-height: calc(100vh - 200px);
-  /* Easy 1 */
-	/* overflow: hidden; */
-  overflow: scroll;
 }
 .sidebar-head {
 	display: grid;
 	gap: 8px;
-  /* Easy 1 */
-  position: sticky;
-  top: 0;
-  background: var(--panel-2);
-  padding: 14px;
-  padding-bottom: 0;
 }
 .sidebar-head .row {
   display: flex;
@@ -223,9 +212,6 @@ body {
 .list {
 	list-style: none;
 	margin: 0;
-  /* Easy 1 */
-	padding: 14px;
-	overflow: auto;
 }
 .list li {
 	border-bottom: 1px solid var(--line);

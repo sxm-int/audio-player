@@ -122,26 +122,9 @@ const App: React.FC = () => {
 		const label = s.name ?? s.title ?? s.url;
 		return label.toLowerCase().includes(filter.toLowerCase());
 	});
-  // // NOTE: JS sort is mutable so we should create a new instance
-  // const searchFiltered = streams.filter((s) => {
-	// 	const label = s.name ?? s.title ?? s.url;
-	// 	return label.toLowerCase().includes(filter.toLowerCase());
-	// })
-  // const alphaSorted = [...searchFiltered].sort((a, b) => {
-  //   const alabel = a.name ?? a.title ?? a.url;
-  //   const blabel = b.name ?? b.title ?? b.url;
-  //   return alabel.localeCompare(blabel);
-  // });
-  // const filtered = useMemo(() => {
-  //   if (sort === 'a-to-z') {
-  //     return alphaSorted;
-  //   }
-  //   return searchFiltered;
-  // }, [sort, searchFiltered, alphaSorted]);
 
   // Easy 2
 	const activeItem = filtered.find((s) => s.url === url) ?? null;
-  // const activeItem = streams.find((s) => s.url === url) ?? null;
   
 	const handleSelect = (item: StreamItem) => {
 		setTempUrl(item.url);
@@ -156,8 +139,6 @@ const App: React.FC = () => {
   // Medium 2
   const handleRemove = (item: StreamItem) => {
     console.log(item);
-    // const newStreams = streams.filter((stream) => stream.id !== item.id);
-    // setStreams(newStreams);
   }
 
 	return (
