@@ -117,7 +117,7 @@ const App: React.FC = () => {
 		}
 	}, [currentTime, dispatch]);
 
-  // Medium 2
+  // Hard 1
 	const filtered = streams.filter((s) => {
 		const label = s.name ?? s.title ?? s.url;
 		return label.toLowerCase().includes(filter.toLowerCase());
@@ -151,6 +151,13 @@ const App: React.FC = () => {
 
   const handleSort = (sortBy: SortBy) => {
     setSort(sortBy);
+  }
+
+  // Medium 2
+  const handleRemove = (item: StreamItem) => {
+    console.log(item);
+    // const newStreams = streams.filter((stream) => stream.id !== item.id);
+    // setStreams(newStreams);
   }
 
 	return (
@@ -236,19 +243,26 @@ const App: React.FC = () => {
 							const label = item.name ?? item.title ?? item.url;
 							const active = item.url === url;
 							return (
-								<li key={item.id ?? item.url}>
+								<li className={`row no-thumb ${active ? 'active' : ''}`} key={item.id ?? item.url}>
+                  <div className="row-meta">
+                    <div className="row-title">{label}</div>
+                    <div className="row-sub">{item.url}</div>
+                  </div>
 									<button
-										className={`row no-thumb ${active ? 'active' : ''}`}
+										className={'btn-chip'}
 										onClick={() => handleSelect(item)}
-										title={item.description ?? label}
+										title={'Play'}
 									>
-										<div className="row-meta">
-											<div className="row-title">{label}</div>
-											<div className="row-sub">{item.url}</div>
-										</div>
 										<span className={`chip ${active ? 'playing' : ''}`}>
 											{active ? 'Playing' : 'Play'}
 										</span>
+									</button>
+									<button
+										className={'btn-chip'}
+										onClick={() => handleRemove(item)}
+										title={'Remove'}
+									>
+                    <span className='chip'>Remove</span>
 									</button>
 								</li>
 							);

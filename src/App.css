@@ -119,7 +119,7 @@ body {
 	font-weight: 600;
 }
 .btn:hover {
-	filter: brightness(1.06);
+	filter: brightness(1.3);
 }
 
 /* Main layout — sidebar always to the right unless small screen */
@@ -252,15 +252,14 @@ body {
 .row.no-thumb {
 	width: 100%;
 	display: grid;
-	grid-template-columns: 1fr auto;
-	gap: 12px;
+	grid-template-columns: 1fr auto auto;
+	gap: 6px;
 	align-items: center;
 	padding: 12px;
 	background: transparent;
 	border: 0;
 	color: inherit;
 	text-align: left;
-	cursor: pointer;
 }
 .row.no-thumb:hover {
 	background: rgba(59, 130, 246, 0.08);
@@ -282,6 +281,15 @@ body {
 	color: var(--muted);
 	overflow-wrap: anywhere;
 }
+.btn-chip {
+  border: transparent;
+	background: transparent;
+  padding: 0;
+}
+.btn-chip:hover {
+	cursor: pointer;
+  filter: brightness(1.3);
+}
 .chip {
 	padding: 6px 10px;
 	border-radius: 999px;
@@ -293,6 +301,11 @@ body {
 .chip.playing {
 	background: linear-gradient(135deg, var(--accent), var(--accent-2));
 	border-color: transparent;
+}
+.chip.playing:hover {
+	background: linear-gradient(135deg, var(--accent-2), var(--accent));
+	border-color: transparent;
+  color: #fff;
 }
 
 /* Controls */
