@@ -1,4 +1,6 @@
 // src/components/Visualizer.tsx
+// Medium 1
+// import React, { useEffect, useRef, memo } from 'react';
 import React, { useEffect, useRef } from 'react';
 
 type Props = {
@@ -186,7 +188,12 @@ const Visualizer: React.FC<Props> = ({
 		};
 	}, [fftSize, height, minHz, maxHz, bars]);
 
+  // Medium 1
+  console.log('Why am I getting logged?');
+
 	return <canvas ref={canvasRef} className="viz-canvas" style={{ height }} />;
 };
 
+// Medium 1
 export default Visualizer;
+// export default memo(Visualizer);
