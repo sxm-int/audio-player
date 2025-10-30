@@ -117,13 +117,11 @@ const App: React.FC = () => {
 		}
 	}, [currentTime, dispatch]);
 
-  // Hard 1
 	const filtered = streams.filter((s) => {
 		const label = s.name ?? s.title ?? s.url;
 		return label.toLowerCase().includes(filter.toLowerCase());
 	});
 
-  // Easy 2
 	const activeItem = filtered.find((s) => s.url === url) ?? null;
   
 	const handleSelect = (item: StreamItem) => {
@@ -136,7 +134,6 @@ const App: React.FC = () => {
     setSort(sortBy);
   }
 
-  // Medium 2
   const handleRemove = (item: StreamItem) => {
     console.log(item);
   }

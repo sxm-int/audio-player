@@ -186,7 +186,6 @@ const Visualizer: React.FC<Props> = ({
 		};
 	}, [fftSize, height, minHz, maxHz, bars]);
 
-  // Medium 1
   console.log('Why am I getting logged?');
 
 	return <canvas ref={canvasRef} className="viz-canvas" style={{ height }} />;
