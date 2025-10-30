@@ -183,6 +183,7 @@ body {
 }
 
 /* Sidebar */
+/* Easy 1 */
 .sidebar {
 	position: sticky;
 	top: 76px;
@@ -191,8 +192,10 @@ body {
 	border: 1px solid var(--line);
 	background: var(--panel-2);
 	border-radius: 16px;
+  padding: 14px;
 	box-shadow: var(--shadow);
 	max-height: calc(100vh - 200px);
+  overflow: hidden;
 }
 .sidebar-head {
 	display: grid;
@@ -212,6 +215,7 @@ body {
 .list {
 	list-style: none;
 	margin: 0;
+  padding: 0;
 }
 .list li {
 	border-bottom: 1px solid var(--line);
