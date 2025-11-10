@@ -119,7 +119,7 @@ body {
 	font-weight: 600;
 }
 .btn:hover {
-	filter: brightness(1.06);
+	filter: brightness(1.3);
 }
 
 /* Main layout — sidebar always to the right unless small screen */
@@ -128,8 +128,8 @@ body {
 	margin: 0 auto;
 	padding: 20px;
 	display: grid;
-	gap: 20px;
-	grid-template-columns: 1fr 340px; /* watch | sidebar */
+	gap: 30px;
+	grid-template-columns: 1fr 400px; /* watch | sidebar */
 	align-items: start;
 }
 
@@ -191,44 +191,64 @@ body {
 	border: 1px solid var(--line);
 	background: var(--panel-2);
 	border-radius: 16px;
-	padding: 14px;
+  padding: 14px;
 	box-shadow: var(--shadow);
-	max-height: calc(100vh - 110px);
-	overflow: hidden;
+	max-height: calc(100vh - 200px);
+  overflow: hidden;
 }
 .sidebar-head {
 	display: grid;
 	gap: 8px;
 }
+.sidebar-head .row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
 .sidebar h2 {
-	margin: 0;
-	font-size: 16px;
+	margin: 3px 0;
+	font-size: 19px;
 	font-weight: 800;
 }
 
 .list {
 	list-style: none;
 	margin: 0;
-	padding: 0;
-	border-top: 1px solid var(--line);
-	overflow: auto;
+  padding: 0;
 }
 .list li {
 	border-bottom: 1px solid var(--line);
 }
 
+.sort {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	flex-wrap: wrap;
+}
+.sort .btn {
+	padding: 8px 12px;
+	border-radius: 10px;
+	border: 1px solid var(--line);
+	background: #2d3344;
+	color: var(--text);
+}
+.sort .btn.active {
+  color: #2d3344;
+  background: var(--text);
+}
+
 .row.no-thumb {
 	width: 100%;
 	display: grid;
-	grid-template-columns: 1fr auto;
-	gap: 12px;
+	grid-template-columns: 1fr auto auto;
+	gap: 6px;
 	align-items: center;
 	padding: 12px;
 	background: transparent;
 	border: 0;
 	color: inherit;
 	text-align: left;
-	cursor: pointer;
 }
 .row.no-thumb:hover {
 	background: rgba(59, 130, 246, 0.08);
@@ -250,6 +270,15 @@ body {
 	color: var(--muted);
 	overflow-wrap: anywhere;
 }
+.btn-chip {
+  border: transparent;
+	background: transparent;
+  padding: 0;
+}
+.btn-chip:hover {
+	cursor: pointer;
+  filter: brightness(1.3);
+}
 .chip {
 	padding: 6px 10px;
 	border-radius: 999px;
@@ -261,6 +290,11 @@ body {
 .chip.playing {
 	background: linear-gradient(135deg, var(--accent), var(--accent-2));
 	border-color: transparent;
+}
+.chip.playing:hover {
+	background: linear-gradient(135deg, var(--accent-2), var(--accent));
+	border-color: transparent;
+  color: #fff;
 }
 
 /* Controls */

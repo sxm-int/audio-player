@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useAppDispatch, useAppSelector } from './hooks';
 import { setUrl, setCurrentTime, setRequestedTime } from './store';
 import HlsAudio from './components/HlsAudio';
@@ -13,6 +13,8 @@ type StreamItem = {
 	url: string;
 	description?: string;
 };
+
+type SortBy = 'recent' | 'a-to-z';
 
 async function waitForMocks(ms = 800, step = 40) {
 	if (!import.meta.env.DEV) return;
@@ -37,6 +39,7 @@ const App: React.FC = () => {
 	const [tempUrl, setTempUrl] = useState(url);
 	const [streams, setStreams] = useState<StreamItem[]>([]);
 	const [filter, setFilter] = useState('');
+  const [sort, setSort] = useState<SortBy>('recent');
 	const audioElRef = useRef<HTMLAudioElement | null>(null);
 
 	useEffect(() => {
@@ -120,12 +123,20 @@ const App: React.FC = () => {
 	});
 
 	const activeItem = filtered.find((s) => s.url === url) ?? null;
-
+  
 	const handleSelect = (item: StreamItem) => {
 		setTempUrl(item.url);
 		dispatch(setUrl(item.url));
 		window.scrollTo({ top: 0, behavior: 'smooth' });
 	};
+
+  const handleSort = (sortBy: SortBy) => {
+    setSort(sortBy);
+  }
+
+  const handleRemove = (item: StreamItem) => {
+    console.log(item);
+  }
 
 	return (
 		<div className="shell">
@@ -185,11 +196,18 @@ const App: React.FC = () => {
 
 				<aside className="sidebar">
 					<div className="sidebar-head">
-						<h2>Playlist</h2>
+            <div className='row'>
+              <h2>Playlist</h2>
+              <div className='sort'>
+                <button className={`btn ${sort === 'recent' ? 'active' : ''}`} onClick={() => handleSort('recent')}>Recent</button>
+                <button className={`btn ${sort === 'a-to-z' ? 'active' : ''}`} onClick={() => handleSort('a-to-z')}>A to Z</button>
+              </div>
+            </div>
 						<input
 							className="input slim"
 							placeholder="Search"
 							value={filter}
+              name="Search"
 							onChange={(e) => setFilter(e.target.value)}
 							aria-label="Filter streams"
 						/>
@@ -203,19 +221,26 @@ const App: React.FC = () => {
 							const label = item.name ?? item.title ?? item.url;
 							const active = item.url === url;
 							return (
-								<li key={item.id ?? item.url}>
+								<li className={`row no-thumb ${active ? 'active' : ''}`} key={item.id ?? item.url}>
+                  <div className="row-meta">
+                    <div className="row-title">{label}</div>
+                    <div className="row-sub">{item.url}</div>
+                  </div>
 									<button
-										className={`row no-thumb ${active ? 'active' : ''}`}
+										className={'btn-chip'}
 										onClick={() => handleSelect(item)}
-										title={item.description ?? label}
+										title={'Play'}
 									>
-										<div className="row-meta">
-											<div className="row-title">{label}</div>
-											<div className="row-sub">{item.url}</div>
-										</div>
 										<span className={`chip ${active ? 'playing' : ''}`}>
 											{active ? 'Playing' : 'Play'}
 										</span>
+									</button>
+									<button
+										className={'btn-chip'}
+										onClick={() => handleRemove(item)}
+										title={'Remove'}
+									>
+                    <span className='chip'>Remove</span>
 									</button>
 								</li>
 							);
