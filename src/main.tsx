@@ -6,7 +6,7 @@ import { store } from './store';
 import App from './App';
 import { streams } from './api/streams';
 
-function installDevFetchShim() {
+function monkeyPatchFetch() {
 	if (!import.meta.env.DEV) return;
 	if ((window as any).__FAKE_API_INSTALLED__) return;
 
@@ -41,33 +41,8 @@ function installDevFetchShim() {
 	console.info('[dev] Installed fetch shim (MSW unavailable)');
 }
 
-async function startMSW() {
-	if (!import.meta.env.DEV) return false;
-	if (!('serviceWorker' in navigator)) return false;
-
-	try {
-		const { worker } = await import('./api/browser'); // msw v2: 'msw/browser'
-		const base = import.meta.env.BASE_URL || '/';
-		const path = `${base.replace(/\/+$/, '')}/mockServiceWorker.js`;
-		const absUrl = new URL(path, window.location.origin).href;
-
-		await worker.start({
-			serviceWorker: { url: absUrl, options: { scope: base || '/' } },
-			onUnhandledRequest: 'bypass',
-		});
-
-		(window as any).__MSW_READY__ = true;
-		console.info('[dev] MSW started');
-		return true;
-	} catch (e) {
-		console.warn('MSW start failed; installing fetch shim instead.', e);
-		return false;
-	}
-}
-
 async function bootstrap() {
-	const ok = await startMSW();
-	if (!ok) installDevFetchShim();
+	monkeyPatchFetch();
 
 	ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
 		<React.StrictMode>
