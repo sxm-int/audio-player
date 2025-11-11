@@ -41,6 +41,7 @@ const App: React.FC = () => {
 	const [filter, setFilter] = useState('');
   const [sort, setSort] = useState<SortBy>('recent');
 	const audioElRef = useRef<HTMLAudioElement | null>(null);
+	const playPromiseRef = useRef<Promise<void> | null>(null);
 
 	useEffect(() => {
 		let aborted = false;
@@ -89,9 +90,26 @@ const App: React.FC = () => {
 		// Only call play/pause if audio element state doesn't match desired state
 		// This prevents circular loops with the audio event listeners
 		if (isPlaying && audio.paused) {
-			audio.play().catch((err) => console.error('Play failed:', err));
+			playPromiseRef.current = audio.play().catch((err) => {
+				console.error('Play failed:', err);
+				playPromiseRef.current = null;
+			});
 		} else if (!isPlaying && !audio.paused) {
-			audio.pause();
+			// Wait for any pending play promise to resolve before pausing
+			if (playPromiseRef.current) {
+				playPromiseRef.current
+					.then(() => {
+						playPromiseRef.current = null;
+						if (!audio.paused) {
+							audio.pause();
+						}
+					})
+					.catch(() => {
+						playPromiseRef.current = null;
+					});
+			} else {
+				audio.pause();
+			}
 		}
 	}, [isPlaying]);
 

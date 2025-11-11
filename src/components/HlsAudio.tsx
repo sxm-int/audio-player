@@ -23,6 +23,7 @@ const HlsAudio: React.FC = () => {
 	const dispatch = useAppDispatch();
 	const audioRef = useRef<HTMLAudioElement | null>(null);
 	const hlsRef = useRef<Hls | null>(null);
+	const playPromiseRef = useRef<Promise<void> | null>(null);
 
 	const canUseNativeHls = useMemo(() => {
 		const a = document.createElement('audio') as HTMLAudioElement & {
@@ -69,12 +70,16 @@ const HlsAudio: React.FC = () => {
 		if (canUseNativeHls) {
 			audio.src = url;
 			audio.load();
-			audio
+			playPromiseRef.current = audio
 				.play()
-				.then(() => dispatch(setStatus('ready')))
+				.then(() => {
+					dispatch(setStatus('ready'));
+					playPromiseRef.current = null;
+				})
 				.catch((err) => {
 					console.error('Audio play failed:', err);
 					dispatch(setStatus('ready'));
+					playPromiseRef.current = null;
 				});
 		} else if (Hls.isSupported()) {
 			const hls = new Hls(config);
@@ -113,9 +118,14 @@ const HlsAudio: React.FC = () => {
 
 			hls.on(Events.MANIFEST_PARSED, () => {
 				dispatch(setStatus('ready'));
-				audio.play().catch((err) => {
-					console.warn('Autoplay blocked or failed:', err);
-				});
+				playPromiseRef.current = audio.play()
+					.then(() => {
+						playPromiseRef.current = null;
+					})
+					.catch((err) => {
+						console.warn('Autoplay blocked or failed:', err);
+						playPromiseRef.current = null;
+					});
 			});
 
 			hls.on(Events.FRAG_LOADING, (_e, data) =>
@@ -166,6 +176,7 @@ const HlsAudio: React.FC = () => {
 		}
 
 		return () => {
+			playPromiseRef.current = null;
 			if (hlsRef.current) {
 				hlsRef.current.destroy();
 				hlsRef.current = null;
