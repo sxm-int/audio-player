@@ -85,9 +85,12 @@ const App: React.FC = () => {
 		const audio = document.querySelector('audio');
 		audioElRef.current = audio as HTMLAudioElement | null;
 		if (!audio) return;
-		if (isPlaying) {
+
+		// Only call play/pause if audio element state doesn't match desired state
+		// This prevents circular loops with the audio event listeners
+		if (isPlaying && audio.paused) {
 			audio.play().catch((err) => console.error('Play failed:', err));
-		} else {
+		} else if (!isPlaying && !audio.paused) {
 			audio.pause();
 		}
 	}, [isPlaying]);
