@@ -4,7 +4,7 @@ import ReactDOM from 'react-dom/client';
 import { Provider } from 'react-redux';
 import { store } from './store';
 import App from './App';
-import { streams } from './mocks/streams';
+import { streams } from './api/streams';
 
 function installDevFetchShim() {
 	if (!import.meta.env.DEV) return;
@@ -46,7 +46,7 @@ async function startMSW() {
 	if (!('serviceWorker' in navigator)) return false;
 
 	try {
-		const { worker } = await import('./mocks/browser'); // msw v2: 'msw/browser'
+		const { worker } = await import('./api/browser'); // msw v2: 'msw/browser'
 		const base = import.meta.env.BASE_URL || '/';
 		const path = `${base.replace(/\/+$/, '')}/mockServiceWorker.js`;
 		const absUrl = new URL(path, window.location.origin).href;
