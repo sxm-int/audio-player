@@ -38,7 +38,7 @@ function monkeyPatchFetch() {
 	};
 
 	(window as any).__FAKE_API_INSTALLED__ = true;
-	console.info('[dev] Installed fetch shim (MSW unavailable)');
+	console.info('Successfully monkey patched fetch.');
 }
 
 async function bootstrap() {
