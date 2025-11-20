@@ -4,6 +4,7 @@ import { setUrl, setCurrentTime, setRequestedTime } from './store';
 import HlsAudio from './components/HlsAudio';
 import Controls from './components/Controls';
 import Visualizer from './components/Visualizer';
+import Login from './components/Login';
 import './App.css';
 
 type StreamItem = {
@@ -40,6 +41,7 @@ const App: React.FC = () => {
 	const [streams, setStreams] = useState<StreamItem[]>([]);
 	const [filter, setFilter] = useState('');
 	const [sort, setSort] = useState<SortBy>('recent');
+	const [loginOpen, setLoginOpen] = useState(false);
 	const audioElRef = useRef<HTMLAudioElement | null>(null);
 	const playPromiseRef = useRef<Promise<void> | null>(null);
 
@@ -159,8 +161,42 @@ const App: React.FC = () => {
 		console.log(item);
 	};
 
+	const handleLogin = async ({
+		email,
+		password,
+	}: {
+		email: string;
+		password: string;
+	}): Promise<{ success: boolean; error?: string }> => {
+		try {
+			const response = await fetch('/login', {
+				method: 'POST',
+				headers: { 'content-type': 'application/json' },
+				body: JSON.stringify({ email, password }),
+			});
+			const data = await response.json();
+			if (!response.ok || data.success !== true) {
+				return {
+					success: false,
+					error: data?.error ?? 'error',
+				};
+			}
+
+			localStorage.setItem('userEmail', email);
+
+			return { success: true };
+		} catch (err) {
+			console.error('Login failed:', err);
+			return {
+				success: false,
+				error: (err as Error).message
+			};
+		}
+	};
+
 	return (
-		<div className="shell">
+		<>
+			<div className="shell">
 			<header className="topbar">
 				<div className="left">
 					<div className="logo">
@@ -172,25 +208,34 @@ const App: React.FC = () => {
 					</div>
 				</div>
 
-				<form
-					className="search"
-					onSubmit={(e) => {
-						e.preventDefault();
-						dispatch(setUrl(tempUrl));
-					}}
-				>
-					<input
-						className="input"
-						type="url"
-						placeholder="Paste an .m3u8 URL and press Enter"
-						value={tempUrl}
-						onChange={(e) => setTempUrl(e.target.value)}
-						required
-					/>
-					<button className="btn" type="submit">
-						Load
+				<div className="search-group">
+					<form
+						className="search"
+						onSubmit={(e) => {
+							e.preventDefault();
+							dispatch(setUrl(tempUrl));
+						}}
+					>
+						<input
+							className="input"
+							type="url"
+							placeholder="Paste an .m3u8 URL and press Enter"
+							value={tempUrl}
+							onChange={(e) => setTempUrl(e.target.value)}
+							required
+						/>
+						<button className="btn" type="submit">
+							Load
+						</button>
+					</form>
+					<button
+						className="btn"
+						type="button"
+						onClick={() => setLoginOpen(true)}
+					>
+						Sign in
 					</button>
-				</form>
+				</div>
 			</header>
 
 			<main className="grid">
@@ -283,6 +328,12 @@ const App: React.FC = () => {
 				</aside>
 			</main>
 		</div>
+			<Login
+				open={loginOpen}
+				onClose={() => setLoginOpen(false)}
+				onSubmit={handleLogin}
+			/>
+		</>
 	);
 };
 

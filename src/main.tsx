@@ -5,6 +5,7 @@ import { Provider } from 'react-redux';
 import { store } from './store';
 import App from './App';
 import { streams } from './api/streams';
+import { VALID_EMAIL, VALID_PASS } from './constants';
 
 function monkeyPatchFetch() {
 	if (!import.meta.env.DEV) return;
@@ -31,6 +32,23 @@ function monkeyPatchFetch() {
 					status: 200,
 					headers: { 'content-type': 'application/json' },
 				});
+			}
+			if (url.pathname === '/login' && init?.method === "POST" && init.body) {
+				const data = JSON.parse(init.body as string || "") as Record<string, any>
+				const email = (typeof data.email === 'string' && data.email)
+				const password = (typeof data.password === 'string' && data.password) 
+				const success = email === VALID_EMAIL && password === VALID_PASS;
+				return new Response(
+					JSON.stringify(
+						success
+							? { success: true, user: { email } }
+							: { success: false, error: 'Invalid credentials' },
+					),
+					{
+						status: success ? 200 : 403,
+						headers: { 'content-type': 'application/json' },
+					},
+				);
 			}
 		}
 
