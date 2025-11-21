@@ -5,7 +5,6 @@ import { Provider } from 'react-redux';
 import { store } from './store';
 import App from './App';
 import { handlers } from './api/handlers';
-import { VALID_EMAIL, VALID_PASS } from './constants';
 
 function monkeyPatchFetch() {
 	if ((window as any).__FAKE_API_INSTALLED__) return;
@@ -28,28 +27,23 @@ function monkeyPatchFetch() {
 			);
 
 			if (matchedHandler) {
-				const data = matchedHandler.handler();
+				// Parse body for POST requests
+				let body: unknown;
+				if (init?.body) {
+					body = JSON.parse(init.body as string);
+				}
+
+				const data = matchedHandler.handler(body);
+
+				// Handle login response status
+				const isLogin = url.pathname === '/login';
+				const success = isLogin ? (data as any)?.success === true : true;
+				const status = isLogin && !success ? 403 : 200;
+
 				return new Response(JSON.stringify(data), {
-					status: 200,
+					status,
 					headers: { 'content-type': 'application/json' },
 				});
-			}
-			if (url.pathname === '/login' && init?.method === "POST" && init.body) {
-				const data = JSON.parse(init.body as string || "") as Record<string, any>
-				const email = (typeof data.email === 'string' && data.email)
-				const password = (typeof data.password === 'string' && data.password) 
-				const success = email === VALID_EMAIL && password === VALID_PASS;
-				return new Response(
-					JSON.stringify(
-						success
-							? { success: true, user: { email } }
-							: { success: false, error: 'Invalid credentials' },
-					),
-					{
-						status: success ? 200 : 403,
-						headers: { 'content-type': 'application/json' },
-					},
-				);
 			}
 		}
 

@@ -5,6 +5,7 @@ import HlsAudio from './components/HlsAudio';
 import Controls from './components/Controls';
 import Visualizer from './components/Visualizer';
 import Login from './components/Login';
+import { handleLogin } from './api/login';
 import './App.css';
 
 type StreamItem = {
@@ -159,39 +160,6 @@ const App: React.FC = () => {
 
 	const handleRemove = (item: StreamItem) => {
 		console.log(item);
-	};
-
-	const handleLogin = async ({
-		email,
-		password,
-	}: {
-		email: string;
-		password: string;
-	}): Promise<{ success: boolean; error?: string }> => {
-		try {
-			const response = await fetch('/login', {
-				method: 'POST',
-				headers: { 'content-type': 'application/json' },
-				body: JSON.stringify({ email, password }),
-			});
-			const data = await response.json();
-			if (!response.ok || data.success !== true) {
-				return {
-					success: false,
-					error: data?.error ?? 'error',
-				};
-			}
-
-			localStorage.setItem('userEmail', email);
-
-			return { success: true };
-		} catch (err) {
-			console.error('Login failed:', err);
-			return {
-				success: false,
-				error: (err as Error).message
-			};
-		}
 	};
 
 	return (
