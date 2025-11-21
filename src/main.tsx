@@ -4,11 +4,10 @@ import ReactDOM from 'react-dom/client';
 import { Provider } from 'react-redux';
 import { store } from './store';
 import App from './App';
-import { streams } from './api/streams';
+import { handlers } from './api/handlers';
 import { VALID_EMAIL, VALID_PASS } from './constants';
 
 function monkeyPatchFetch() {
-	if (!import.meta.env.DEV) return;
 	if ((window as any).__FAKE_API_INSTALLED__) return;
 
 	const realFetch = window.fetch.bind(window);
@@ -19,16 +18,18 @@ function monkeyPatchFetch() {
 				? input
 				: ((input as URL).toString?.() ?? (input as Request).url);
 		const url = new URL(href, window.location.origin);
+		const method = init?.method || 'GET';
 
 		if (url.origin === window.location.origin) {
-			if (url.pathname === '/hello-world') {
-				return new Response(JSON.stringify({ data: 'Hello world.' }), {
-					status: 200,
-					headers: { 'content-type': 'application/json' },
-				});
-			}
-			if (url.pathname === '/streams') {
-				return new Response(JSON.stringify(streams), {
+			const matchedHandler = handlers.find(
+				(h) =>
+					h.method.toUpperCase() === method.toUpperCase() &&
+					h.path === url.pathname,
+			);
+
+			if (matchedHandler) {
+				const data = matchedHandler.handler();
+				return new Response(JSON.stringify(data), {
 					status: 200,
 					headers: { 'content-type': 'application/json' },
 				});
