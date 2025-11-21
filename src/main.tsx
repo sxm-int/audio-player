@@ -27,9 +27,21 @@ function monkeyPatchFetch() {
 			);
 
 			if (matchedHandler) {
-				const data = matchedHandler.handler();
+				// Parse body for POST requests
+				let body: unknown;
+				if (init?.body) {
+					body = JSON.parse(init.body as string);
+				}
+
+				const data = matchedHandler.handler(body);
+
+				// Handle login response status
+				const isLogin = url.pathname === '/login';
+				const success = isLogin ? (data as any)?.success === true : true;
+				const status = isLogin && !success ? 403 : 200;
+
 				return new Response(JSON.stringify(data), {
-					status: 200,
+					status,
 					headers: { 'content-type': 'application/json' },
 				});
 			}
