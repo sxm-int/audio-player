@@ -1,13 +1,22 @@
-import { http, HttpResponse } from 'msw';
 import { streams } from './streams';
 
-export const handlers = [
-	http.get('/hello-world', () => {
-		return HttpResponse.json({
+export interface MockHandler {
+	method: string;
+	path: string;
+	handler: () => unknown;
+}
+
+export const handlers: MockHandler[] = [
+	{
+		method: 'GET',
+		path: '/hello-world',
+		handler: () => ({
 			data: 'Hello world.',
-		});
-	}),
-	http.get('/streams', () => {
-		return HttpResponse.json(streams);
-	}),
+		}),
+	},
+	{
+		method: 'GET',
+		path: '/streams',
+		handler: () => streams,
+	},
 ];

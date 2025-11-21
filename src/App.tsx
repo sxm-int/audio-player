@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useAppDispatch, useAppSelector } from './hooks';
 import { setUrl, setCurrentTime, setRequestedTime } from './store';
 import HlsAudio from './components/HlsAudio';
