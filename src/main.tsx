@@ -4,7 +4,7 @@ import ReactDOM from 'react-dom/client';
 import { Provider } from 'react-redux';
 import { store } from './store';
 import App from './App';
-import { handlers } from './api/handlers';
+import { handlers, type MockHandler } from './api/handlers';
 
 function monkeyPatchFetch() {
 	if ((window as any).__FAKE_API_INSTALLED__) return;
@@ -20,7 +20,7 @@ function monkeyPatchFetch() {
 		const method = init?.method || 'GET';
 
 		if (url.origin === window.location.origin) {
-			const matchedHandler = handlers.find(
+			const matchedHandler: MockHandler | undefined = handlers.find(
 				(h) =>
 					h.method.toUpperCase() === method.toUpperCase() &&
 					h.path === url.pathname,
