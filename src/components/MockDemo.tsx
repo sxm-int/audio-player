@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
+import { loggedFetch } from '../lib/loggedFetch';
 
 export function MockDemo() {
 	const [data, setData] = useState(null);
 
 	useEffect(() => {
-		fetch('/hello-world')
+		loggedFetch('/hello-world')
 			.then((res) => res.json())
 			.then((res) => {
 				console.log(res.data);
