@@ -11,7 +11,7 @@ export async function loggedFetch(
 	options?: LoggedFetchOptions,
 ) {
 	const logger = options?.logger ?? getRequestLogger();
-	const method = init?.method ?? 'GET'
+	const method = init?.method === 'GET' ? init.method : 'GET'
 
 	logger.logRequest({ method, url, body: init?.body ?? null });
 
