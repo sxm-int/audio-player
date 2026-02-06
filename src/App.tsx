@@ -6,6 +6,7 @@ import Controls from './components/Controls';
 import Visualizer from './components/Visualizer';
 import Login from './components/Login';
 import { handleLogin } from './api/login';
+import { loggedFetch } from './lib/loggedFetch';
 import './App.css';
 
 type StreamItem = {
@@ -52,7 +53,7 @@ const App: React.FC = () => {
 			let lastErr: unknown;
 			for (let attempt = 0; attempt < 3; attempt++) {
 				try {
-					const res = await fetch('/streams', { cache: 'no-store' });
+					const res = await loggedFetch('/streams', { cache: 'no-store' });
 					const ctype = res.headers.get('content-type') || '';
 					if (!res.ok) throw new Error(`GET /streams ${res.status}`);
 					if (!ctype.includes('application/json')) {

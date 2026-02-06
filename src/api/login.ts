@@ -1,3 +1,5 @@
+import { loggedFetch } from "../lib/loggedFetch";
+
 export async function handleLogin({
 	email,
 	password,
@@ -6,7 +8,7 @@ export async function handleLogin({
 	password: string;
 }): Promise<{ success: boolean; error?: string }> {
 	try {
-		const response = await fetch('/login', {
+		const response = await loggedFetch('/login', {
 			method: 'POST',
 			headers: { 'content-type': 'application/json' },
 			body: JSON.stringify({ email, password }),
