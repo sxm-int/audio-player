@@ -1,20 +1,15 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useAppDispatch, useAppSelector } from './hooks';
-import { setUrl, setCurrentTime, setRequestedTime } from './store';
+import { setUrl, setCurrentTime, setRequestedTime, setStreams } from './store';
 import HlsAudio from './components/HlsAudio';
 import Controls from './components/Controls';
 import Visualizer from './components/Visualizer';
 import Login from './components/Login';
 import { handleLogin } from './api/login';
+import type { StreamItem } from './api/streams';
 import './App.css';
 
-type StreamItem = {
-	id?: string;
-	name?: string;
-	title?: string;
-	url: string;
-	description?: string;
-};
+type SortListBy = 'recent' | 'a-to-z' | 'premium';
 
 async function waitForMocks(ms = 800, step = 40) {
 	if (!import.meta.env.DEV) return;
@@ -35,10 +30,10 @@ const App: React.FC = () => {
 	const { url, isPlaying, currentTime, requestedTime } = useAppSelector(
 		(s) => s.player,
 	);
+	const streams = useAppSelector((s) => s.streams.items);
 
 	const [tempUrl, setTempUrl] = useState(url);
-	const [streams, setStreams] = useState<StreamItem[]>([]);
-	const [filter, setFilter] = useState('');
+	const [listSearchText, setListSearchText] = useState('');
 	const [loginOpen, setLoginOpen] = useState(false);
 	const audioElRef = useRef<HTMLAudioElement | null>(null);
 	const playPromiseRef = useRef<Promise<void> | null>(null);
@@ -59,10 +54,7 @@ const App: React.FC = () => {
 						throw new Error(`Non-JSON response (${ctype || 'unknown'})`);
 					}
 					const items: StreamItem[] = await res.json();
-					if (!aborted)
-						setStreams(
-							items.map((it, i) => ({ id: it.id ?? `${i}-${it.url}`, ...it })),
-						);
+					if (!aborted) dispatch(setStreams(items));
 					return;
 				} catch (err) {
 					lastErr = err;
@@ -72,7 +64,7 @@ const App: React.FC = () => {
 			}
 			if (!aborted) {
 				console.error('Error fetching streams:', lastErr);
-				setStreams([]);
+				dispatch(setStreams([]));
 			}
 		};
 
@@ -80,7 +72,7 @@ const App: React.FC = () => {
 		return () => {
 			aborted = true;
 		};
-	}, []);
+	}, [dispatch]);
 
 	useEffect(() => {
 		const audio = document.querySelector('audio');
@@ -139,13 +131,12 @@ const App: React.FC = () => {
 	}, [currentTime, dispatch]);
 
 	const filtered = streams.filter((s) => {
-		const label = s.name ?? s.title ?? s.url;
-		return label.toLowerCase().includes(filter.toLowerCase());
+		return s.title.toLowerCase().includes(listSearchText.toLowerCase());
 	});
 
-	const activeItem = filtered.find((s) => s.url === url) ?? null;
+	const activeStream = streams.find((s) => s.url === url) ?? {};
 
-	const handleSelect = (item: StreamItem) => {
+	const handlePlay = (item: StreamItem) => {
 		setTempUrl(item.url);
 		dispatch(setUrl(item.url));
 		window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -203,7 +194,7 @@ const App: React.FC = () => {
 						</div>
 						<div className="meta">
 							<h1 className="now-title">
-								{(activeItem?.title ?? activeItem?.name) || 'Now Playing'}
+								{activeStream?.title || 'Now Playing'}
 							</h1>
 							<div className="now-url" title={url}>
 								{url}
@@ -225,10 +216,10 @@ const App: React.FC = () => {
 						<input
 							className="input slim"
 							placeholder="Search"
-							value={filter}
+							value={listSearchText}
 							name="Search"
-							onChange={(e) => setFilter(e.target.value)}
-							aria-label="Filter streams"
+							onChange={(e) => setListSearchText(e.target.value)}
+							aria-label="Search streams"
 						/>
 					</div>
 
@@ -237,12 +228,12 @@ const App: React.FC = () => {
 							<li className="empty">No streams found</li>
 						)}
 						{filtered.map((item) => {
-							const label = item.name ?? item.title ?? item.url;
+							const label = item.title;
 							const active = item.url === url;
 							return (
 								<li
 									className={`row no-thumb ${active ? 'active' : ''}`}
-									key={item.id ?? item.url}
+									key={item.id}
 								>
 									<div className="row-meta">
 										<div className="row-title">{label}</div>
@@ -250,7 +241,7 @@ const App: React.FC = () => {
 									</div>
 									<button
 										className={'btn-chip'}
-										onClick={() => handleSelect(item)}
+										onClick={() => handlePlay(item)}
 										title={'Play'}
 									>
 										<span className={`chip ${active ? 'playing' : ''}`}>

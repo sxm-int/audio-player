@@ -1,5 +1,6 @@
 import { configureStore, createSlice } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
+import type { StreamItem } from './api/streams';
 
 export type PlayerState = {
 	url: string;
@@ -79,9 +80,30 @@ export const {
 	setRequestedTime,
 } = playerSlice.actions;
 
+export type StreamsState = {
+	items: StreamItem[];
+};
+
+const streamsInitialState: StreamsState = {
+	items: [],
+};
+
+const streamsSlice = createSlice({
+	name: 'streams',
+	initialState: streamsInitialState,
+	reducers: {
+		setStreams(state, action: PayloadAction<StreamItem[]>) {
+			state.items = action.payload;
+		},
+	},
+});
+
+export const { setStreams } = streamsSlice.actions;
+
 export const store = configureStore({
 	reducer: {
 		player: playerSlice.reducer,
+		streams: streamsSlice.reducer,
 	},
 });
 
