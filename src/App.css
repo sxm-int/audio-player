@@ -22,9 +22,6 @@ body,
 }
 body {
 	margin: 0;
-	background:
-		radial-gradient(1200px 600px at 10% -10%, #0e1530 0%, transparent 65%),
-		var(--bg);
 	color: var(--text);
 	font-family:
 		ui-sans-serif,
@@ -43,6 +40,9 @@ body {
 	display: grid;
 	grid-template-rows: auto 1fr;
 	min-height: 100%;
+	background:
+		radial-gradient(1200px 600px at 10% -10%, #0e1530 0%, transparent 65%),
+		var(--bg);
 }
 
 /* Topbar */
@@ -136,7 +136,7 @@ body {
 .grid {
 	margin: 0 auto;
 	display: grid;
-	grid-template-columns: 60% 1fr;
+	grid-template-columns: 1fr 360px;
         gap: 20px;
         padding: 20px; 
 }
@@ -206,12 +206,9 @@ body {
         overflow: auto;
 }
 .sidebar-head {
-	position: sticky;
-	top: 0px;
-        padding: 14px;
-	background: var(--panel-2);
 	display: grid;
 	gap: 8px;
+        padding: 14px;
 }
 .sidebar-head .row {
   display: flex;
@@ -231,10 +228,6 @@ body {
 }
 .list li {
 	border-top: 1px solid var(--line);
-}
-
-.list .empty {
-        padding: 14px;
 }
 
 .sort {
