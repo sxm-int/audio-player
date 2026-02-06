@@ -135,11 +135,10 @@ body {
 /* Main layout — sidebar always to the right unless small screen */
 .grid {
 	margin: 0 auto;
-        margin-top: 24px;
-        max-width: 1220px;
 	display: grid;
-	grid-template-columns: minmax(800px, 1fr) minmax(400px, 1fr); 
+	grid-template-columns: 60% 1fr;
         gap: 20px;
+        padding: 20px; 
 }
 
 /* Watch section */
@@ -456,3 +455,12 @@ audio {
 	color: var(--text);
 }
 
+@media (max-width: 1024px) {
+	.sidebar {
+		position: static;
+		max-height: none;
+	}
+	.now {
+		grid-template-columns: 140px 1fr;
+	}
+}
