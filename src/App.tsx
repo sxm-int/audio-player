@@ -130,7 +130,7 @@ const App: React.FC = () => {
 		}
 	}, [currentTime, dispatch]);
 
-	const filtered = streams.filter((s) => {
+	const filteredStreams = streams.filter((s) => {
 		return s.title.toLowerCase().includes(listSearchText.toLowerCase());
 	});
 
@@ -224,10 +224,7 @@ const App: React.FC = () => {
 					</div>
 
 					<ul className="list">
-						{filtered.length === 0 && (
-							<li className="empty">No streams found</li>
-						)}
-						{filtered.map((item) => {
+						{filteredStreams.map((item) => {
 							const label = item.title;
 							const active = item.url === url;
 							return (
