@@ -34,6 +34,7 @@ const App: React.FC = () => {
 
 	const [tempUrl, setTempUrl] = useState(url);
 	const [listSearchText, setListSearchText] = useState('');
+        const [listSort, setListSort] = useState('recent');
 	const [loginOpen, setLoginOpen] = useState(false);
 	const audioElRef = useRef<HTMLAudioElement | null>(null);
 	const playPromiseRef = useRef<Promise<void> | null>(null);
@@ -142,6 +143,14 @@ const App: React.FC = () => {
 		window.scrollTo({ top: 0, behavior: 'smooth' });
 	};
 
+        const handleSort = (sort: SortListBy) =>  {
+
+        };
+
+        const handleDelete = (item: StreamItem) => {
+
+        };
+
 	return (
 		<>
 			<div className="shell">
@@ -212,6 +221,20 @@ const App: React.FC = () => {
 					<div className="sidebar-head">
 						<div className="row">
 							<h2>Playlist</h2>
+                                                        <div className='sort'>
+								<button
+									className={'btn'}
+									onClick={() => handleSort('recent')}
+								>
+                                                                        Recent
+								</button>
+								<button
+									className={'btn'}
+									onClick={() => handleSort('a-to-z')}
+								>
+									A to Z
+								</button>
+                                                        </div>
 						</div>
 						<input
 							className="input slim"
@@ -244,6 +267,13 @@ const App: React.FC = () => {
 										<span className={`chip ${active ? 'playing' : ''}`}>
 											{active ? 'Playing' : 'Play'}
 										</span>
+									</button>
+									<button
+										className={'btn-chip'}
+										onClick={() => handleDelete(item)}
+										title={'Remove'}
+									>
+										<span className="chip">Remove</span>
 									</button>
 								</li>
 							);
