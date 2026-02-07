@@ -33,7 +33,7 @@ function monkeyPatchFetch() {
 					body = JSON.parse(init.body as string);
 				}
 
-				const data = matchedHandler.handler(body);
+				const data = await matchedHandler.handler(body);
 
 				// Handle login response status
 				const isLogin = url.pathname === '/login';
