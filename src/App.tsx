@@ -34,7 +34,6 @@ const App: React.FC = () => {
 
 	const [tempUrl, setTempUrl] = useState(url);
 	const [listSearchText, setListSearchText] = useState('');
-        const [listSort, setListSort] = useState('recent');
 	const [loginOpen, setLoginOpen] = useState(false);
 	const audioElRef = useRef<HTMLAudioElement | null>(null);
 	const playPromiseRef = useRef<Promise<void> | null>(null);
@@ -135,7 +134,7 @@ const App: React.FC = () => {
 		return s.title.toLowerCase().includes(listSearchText.toLowerCase());
 	});
 
-	const activeStream = streams.find((s) => s.url === url) ?? {};
+	const activeStream = streams.find((s) => s.url === url);
 
 	const handlePlay = (item: StreamItem) => {
 		setTempUrl(item.url);
@@ -143,13 +142,9 @@ const App: React.FC = () => {
 		window.scrollTo({ top: 0, behavior: 'smooth' });
 	};
 
-        const handleSort = (sort: SortListBy) =>  {
+  const handleSort = (sort: SortListBy) =>  {};
 
-        };
-
-        const handleDelete = (item: StreamItem) => {
-
-        };
+  const handleDelete = (item: StreamItem) => {};
 
 	return (
 		<>
@@ -195,91 +190,98 @@ const App: React.FC = () => {
 				</div>
 			</header>
 
-			<main className="grid">
-				<section className="watch">
-					<div className="now">
-						<div className="viz-card">
-							<Visualizer height={140} fftSize={2048} />
-						</div>
-						<div className="meta">
-							<h1 className="now-title">
-								{activeStream?.title || 'Now Playing'}
-							</h1>
-							<div className="now-url" title={url}>
-								{url}
+			<main className='main-content'>
+				<div className="grid">
+					<section className="watch">
+						<div className="now">
+							<div className="viz-card">
+								<Visualizer height={140} fftSize={2048} />
+							</div>
+							<div className="meta">
+								<h1 className="now-title">
+									{activeStream?.title || 'Now Playing'}
+								</h1>
+								<div className="now-url" title={url}>
+									{url}
+								</div>
 							</div>
 						</div>
-					</div>
 
-					<div className="card">
-						<HlsAudio />
-						<Controls />
-					</div>
-				</section>
-
-				<aside className="sidebar">
-					<div className="sidebar-head">
-						<div className="row">
-							<h2>Playlist</h2>
-                                                        <div className='sort'>
-								<button
-									className={'btn'}
-									onClick={() => handleSort('recent')}
-								>
-                                                                        Recent
-								</button>
-								<button
-									className={'btn'}
-									onClick={() => handleSort('a-to-z')}
-								>
-									A to Z
-								</button>
-                                                        </div>
+						<div className="card">
+							<HlsAudio />
+							<Controls />
 						</div>
-						<input
-							className="input slim"
-							placeholder="Search"
-							value={listSearchText}
-							name="Search"
-							onChange={(e) => setListSearchText(e.target.value)}
-							aria-label="Search streams"
-						/>
-					</div>
+					</section>
 
-					<ul className="list">
-						{filteredStreams.map((item) => {
-							const label = item.title;
-							const active = item.url === url;
-							return (
-								<li
-									className={`row no-thumb ${active ? 'active' : ''}`}
-									key={item.id}
-								>
-									<div className="row-meta">
-										<div className="row-title">{label}</div>
-										<div className="row-sub">{item.url}</div>
-									</div>
-									<button
-										className={'btn-chip'}
-										onClick={() => handlePlay(item)}
-										title={'Play'}
+					<aside className="sidebar">
+						<div className="sidebar-head">
+							<div className="row">
+								<h2>Playlist</h2>
+                <div className='sort'>
+                  <button
+                    className={'btn'}
+                    onClick={() => handleSort('recent')}
+                  >
+                    Recent
+                  </button>
+                  <button
+                    className={'btn'}
+                    onClick={() => handleSort('a-to-z')}
+                  >
+                    A to Z
+                  </button>
+                </div>
+							</div>
+							<input
+								className="input slim"
+								placeholder="Search"
+								value={listSearchText}
+								name="Search"
+								onChange={(e) => setListSearchText(e.target.value)}
+								aria-label="Search streams"
+							/>
+						</div>
+
+						<ul className="list">
+							{filteredStreams.map((item) => {
+								const label = item.title;
+								const active = item.url === url;
+								return (
+									<li
+										className={`row no-thumb ${active ? 'active' : ''}`}
+										key={item.id}
 									>
-										<span className={`chip ${active ? 'playing' : ''}`}>
-											{active ? 'Playing' : 'Play'}
-										</span>
-									</button>
-									<button
-										className={'btn-chip'}
-										onClick={() => handleDelete(item)}
-										title={'Remove'}
-									>
-										<span className="chip">Remove</span>
-									</button>
-								</li>
-							);
-						})}
-					</ul>
-				</aside>
+										<div className="row-meta">
+											<div className="row-title">
+												{item.isPremium && (
+													<span className="premium-badge">Premium</span>
+												)}
+												{label}
+											</div>
+											<div className="row-sub">{item.url}</div>
+										</div>
+										<button
+											className={'btn-chip'}
+											onClick={() => handlePlay(item)}
+											title={'Play'}
+										>
+											<span className={`chip ${active ? 'playing' : ''}`}>
+												{active ? 'Playing' : 'Play'}
+											</span>
+										</button>
+                    <button
+                      className={'btn-chip'}
+                      onClick={() => handleDelete(item)}
+                      title={'Remove'}
+                    >
+                      <span className="chip">Remove</span>
+                    </button>
+									</li>
+								);
+							})}
+						</ul>
+					</aside>
+				</div>
 			</main>
 		</div>
 			<Login
