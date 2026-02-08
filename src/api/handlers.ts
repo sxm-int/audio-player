@@ -45,10 +45,8 @@ export const handlers: MockHandler[] = [
 			// Mock upgrade - set to true for success and false for error responses.
 			const success = true;
 			return {
-				success,
-				...(success
-					? { message: 'Successfully upgraded to premium!' }
-					: { error: 'Upgrade failed. Please try again.' }),
+				status: success ? 'success' : 'error',
+        message: success ? 'Successfully upgraded to premium!' : 'Upgrade failed. Please try again.',
 			};
 		},
 	},

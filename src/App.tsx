@@ -1,6 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useAppDispatch, useAppSelector } from './hooks';
-import { setUrl, setCurrentTime, setRequestedTime, setStreams } from './store';
+import {
+	setUrl,
+	setCurrentTime,
+	setRequestedTime,
+	setStreams,
+} from './store';
 import HlsAudio from './components/HlsAudio';
 import Controls from './components/Controls';
 import Visualizer from './components/Visualizer';
@@ -9,7 +14,7 @@ import { handleLogin } from './api/login';
 import type { StreamItem } from './api/streams';
 import './App.css';
 
-type SortListBy = 'recent' | 'a-to-z' | 'premium';
+// type SortListBy = 'recent' | 'a-to-z';
 
 async function waitForMocks(ms = 800, step = 40) {
 	if (!import.meta.env.DEV) return;
@@ -37,6 +42,11 @@ const App: React.FC = () => {
 	const [loginOpen, setLoginOpen] = useState(false);
 	const audioElRef = useRef<HTMLAudioElement | null>(null);
 	const playPromiseRef = useRef<Promise<void> | null>(null);
+
+  const filteredStreams = streams.filter((s) => {
+		return s.title.toLowerCase().includes(listSearchText.toLowerCase());
+	});
+	const activeStream = streams.find((s) => s.url === url);
 
 	useEffect(() => {
 		let aborted = false;
@@ -130,16 +140,9 @@ const App: React.FC = () => {
 		}
 	}, [currentTime, dispatch]);
 
-	const filteredStreams = streams.filter((s) => {
-		return s.title.toLowerCase().includes(listSearchText.toLowerCase());
-	});
-
-	const activeStream = streams.find((s) => s.url === url) ?? {};
-
 	const handlePlay = (item: StreamItem) => {
 		setTempUrl(item.url);
 		dispatch(setUrl(item.url));
-		window.scrollTo({ top: 0, behavior: 'smooth' });
 	};
 
 	return (
@@ -235,9 +238,6 @@ const App: React.FC = () => {
 									>
 										<div className="row-meta">
 											<div className="row-title">
-												{item.isPremium && (
-													<span className="premium-badge">Premium</span>
-												)}
 												{label}
 											</div>
 											<div className="row-sub">{item.url}</div>

@@ -1,7 +1,6 @@
 export async function handleUpgrade(): Promise<{
-	success: boolean;
-	error?: string;
-	message?: string;
+  status: 'success' | 'error';
+	message: string;
 }> {
 	const response = await fetch('/upgrade', {
 		method: 'POST',
@@ -10,12 +9,12 @@ export async function handleUpgrade(): Promise<{
 	});
 	const data = await response.json();
 
-	if (!response.ok || data.success !== true) {
+	if (!response.ok || !data.status || !data.message) {
 		return {
-			success: false,
-			error: data?.error ?? 'Upgrade failed',
+      status: 'error',
+			message: 'Upgrade failed. Please try again.',
 		};
 	}
 
-	return { success: true, message: data.message };
+	return { status: data.status, message: data.message };
 }
