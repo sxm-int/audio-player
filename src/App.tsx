@@ -10,6 +10,7 @@ import HlsAudio from './components/HlsAudio';
 import Controls from './components/Controls';
 import Visualizer from './components/Visualizer';
 import Login from './components/Login';
+import Recommendations from './components/Recommendations';
 import { handleLogin } from './api/login';
 import type { StreamItem } from './api/streams';
 import './App.css';
@@ -210,6 +211,8 @@ const App: React.FC = () => {
 							<HlsAudio />
 							<Controls />
 						</div>
+
+						<Recommendations />
 					</section>
 
 					<aside className="sidebar">

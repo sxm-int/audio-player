@@ -39,10 +39,13 @@ export const handlers: MockHandler[] = [
 		method: 'POST',
 		path: '/upgrade',
 		handler: async () => {
-			// Wait for 1000ms to simulate network delay
-			await new Promise((resolve) => setTimeout(resolve, 1000));
+      console.debug('/upgrade');
 
-			// Mock upgrade - set to true for success and false for error responses.
+			// simulate network delay
+      const delay = 0;
+			await new Promise((resolve) => setTimeout(resolve, delay));
+
+			// set to true for success and false for error responses.
 			const success = true;
 			return {
 				status: success ? 'success' : 'error',

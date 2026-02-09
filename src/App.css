@@ -466,6 +466,71 @@ audio {
 	color: var(--text);
 }
 
+/* Recommendations Section */
+.recommendations {
+	margin-top: 32px;
+}
+
+.recommendations-title {
+	margin: 0 0 20px 0;
+	font-size: 22px;
+	font-weight: 800;
+	color: var(--text);
+}
+
+.recommendations-grid {
+	display: grid;
+	grid-template-columns: repeat(2, 1fr);
+	gap: 16px;
+}
+
+.recommendation-card {
+	background: var(--card);
+	border: 1px solid var(--line);
+	border-radius: 16px;
+	padding: 20px;
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.recommendation-card:hover {
+	transform: translateY(-2px);
+	box-shadow: var(--shadow);
+}
+
+.recommendation-title {
+	margin: 0;
+	font-size: 16px;
+	font-weight: 700;
+	color: var(--text);
+}
+
+.recommendation-desc {
+	margin: 0;
+	font-size: 13px;
+	color: var(--muted);
+	line-height: 1.5;
+	flex: 1;
+}
+
+.recommendation-link {
+	color: var(--accent);
+	text-decoration: none;
+	font-size: 14px;
+	font-weight: 600;
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	margin-top: 4px;
+	transition: color 0.2s;
+}
+
+.recommendation-link:hover {
+	color: var(--accent-2);
+}
+
 @media (max-width: 1024px) {
 	.sidebar {
 		position: static;
