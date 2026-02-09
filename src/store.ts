@@ -100,10 +100,31 @@ const streamsSlice = createSlice({
 
 export const { setStreams } = streamsSlice.actions;
 
+export type AuthState = {
+	isUserPremium: boolean;
+};
+
+const authInitialState: AuthState = {
+	isUserPremium: false,
+};
+
+const authSlice = createSlice({
+	name: 'auth',
+	initialState: authInitialState,
+	reducers: {
+		setUserPremium(state, action: PayloadAction<boolean>) {
+			state.isUserPremium = action.payload;
+		},
+	},
+});
+
+export const { setUserPremium } = authSlice.actions;
+
 export const store = configureStore({
 	reducer: {
 		player: playerSlice.reducer,
 		streams: streamsSlice.reducer,
+		auth: authSlice.reducer,
 	},
 });
 

@@ -5,13 +5,17 @@ import {
 	setCurrentTime,
 	setRequestedTime,
 	setStreams,
+	setUserPremium,
 } from './store';
 import HlsAudio from './components/HlsAudio';
 import Controls from './components/Controls';
 import Visualizer from './components/Visualizer';
 import Login from './components/Login';
+import PremiumModal from './components/PremiumModal';
+import Toast from './components/Toast';
 import Recommendations from './components/Recommendations';
 import { handleLogin } from './api/login';
+import { handleUpgrade } from './api/upgrade';
 import type { StreamItem } from './api/streams';
 import './App.css';
 
@@ -37,10 +41,14 @@ const App: React.FC = () => {
 		(s) => s.player,
 	);
 	const streams = useAppSelector((s) => s.streams.items);
+	const isUserPremium = useAppSelector((s) => s.auth.isUserPremium);
 
 	const [tempUrl, setTempUrl] = useState(url);
 	const [listSearchText, setListSearchText] = useState('');
 	const [loginOpen, setLoginOpen] = useState(false);
+	const [premiumModalOpen, setPremiumModalOpen] = useState(false);
+	const [selectedPremiumTrack, setSelectedPremiumTrack] = useState<StreamItem | null>(null);
+	const [toast, setToast] = useState<{ message: string; type: string; } | null>(null);
 	const audioElRef = useRef<HTMLAudioElement | null>(null);
 	const playPromiseRef = useRef<Promise<void> | null>(null);
 
@@ -142,8 +150,43 @@ const App: React.FC = () => {
 	}, [currentTime, dispatch]);
 
 	const handlePlay = (item: StreamItem) => {
+		if (item.isPremium && !isUserPremium) {
+			setSelectedPremiumTrack(item);
+			setPremiumModalOpen(true);
+			return;
+		}
+
 		setTempUrl(item.url);
 		dispatch(setUrl(item.url));
+	};
+
+	const handleUpgradeClick = async () => {
+		try {
+			const result = await handleUpgrade();
+
+      if (result.status === 'success') {
+        dispatch(setUserPremium(true));
+      }
+
+      setToast({
+        message: result.message,
+        type: result.status,
+      });
+
+			return result;
+		} catch (err) {
+      const errorMessage = 'An error occurred during upgrade.';
+
+			setToast({
+				message: errorMessage,
+				type: 'error',
+			});
+
+      return {
+        status: 'error',
+        message: errorMessage,
+      };
+		}
 	};
 
 	return (
@@ -241,6 +284,9 @@ const App: React.FC = () => {
 									>
 										<div className="row-meta">
 											<div className="row-title">
+												{item.isPremium && (
+													<span className="premium-badge">Premium</span>
+												)}
 												{label}
 											</div>
 											<div className="row-sub">{item.url}</div>
@@ -267,6 +313,22 @@ const App: React.FC = () => {
 				onClose={() => setLoginOpen(false)}
 				onSubmit={handleLogin}
 			/>
+      {premiumModalOpen && selectedPremiumTrack && (
+        <PremiumModal
+          open={premiumModalOpen}
+          trackTitle={selectedPremiumTrack?.title}
+          onClose={() => setPremiumModalOpen(false)}
+          onUpgrade={handleUpgradeClick}
+          onSuccess={() => setSelectedPremiumTrack(null)}
+        />
+      )}
+			{toast && (
+				<Toast
+					message={toast.message}
+					type={toast.type}
+					onClose={() => setToast(null)}
+				/>
+			)}
 		</>
 	);
 };

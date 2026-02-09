@@ -42,7 +42,7 @@ export const handlers: MockHandler[] = [
       console.debug('/upgrade');
 
 			// simulate network delay
-      const delay = 0;
+      const delay = 1000;
 			await new Promise((resolve) => setTimeout(resolve, delay));
 
 			// set to true for success and false for error responses.
