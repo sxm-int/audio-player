@@ -55,24 +55,24 @@ const App: React.FC = () => {
 	const handleUpgradeClick = async () => {
 		try {
 			const result = await handleUpgrade();
-      if (result.status === 'success') {
-        dispatch(setUserPremium(true));
-      }
-      setToast({
-        message: result.message,
-        type: result.status,
-      });
+			if (result.status === 'success') {
+				dispatch(setUserPremium(true));
+			}
+			setToast({
+				message: result.message,
+				type: result.status,
+			});
 			return result;
 		} catch (err) {
-      const errorMessage = 'An error occurred during upgrade.';
+			const errorMessage = 'An error occurred during upgrade.';
 			setToast({
 				message: errorMessage,
 				type: 'error',
 			});
-      return {
-        status: 'error',
-        message: errorMessage,
-      };
+			return {
+				status: 'error',
+				message: errorMessage,
+			};
 		}
 	};
 
@@ -200,15 +200,15 @@ const App: React.FC = () => {
         onClose={() => setLoginOpen(false)}
         onSubmit={handleLogin}
       />
-      {premiumModalOpen && selectedPremiumTrack && (
-        <PremiumModal
-          open={premiumModalOpen}
-          trackTitle={selectedPremiumTrack?.title}
-          onClose={() => setPremiumModalOpen(false)}
-          onUpgrade={handleUpgradeClick}
-          onSuccess={() => setSelectedPremiumTrack(null)}
-        />
-      )}
+			{premiumModalOpen && selectedPremiumTrack && (
+				<PremiumModal
+					open={premiumModalOpen}
+					trackTitle={selectedPremiumTrack?.title}
+					onClose={() => setPremiumModalOpen(false)}
+					onUpgrade={handleUpgradeClick}
+					onSuccess={() => setSelectedPremiumTrack(null)}
+				/>
+			)}
 			{toast && (
 				<Toast
 					message={toast.message}
