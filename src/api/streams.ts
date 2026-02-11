@@ -18,14 +18,14 @@ export const streams: StreamItem[] = [
 		id: 'd3e4fb',
 		title: 'Big Buck Bunny - 480p only',
 		url: 'https://test-streams.mux.dev/x36xhzz/url_6/193039199_mp4_h264_aac_hq_7.m3u8',
-		isPremium: true,
+		isPremium: false,
 		collectedAt: '2025-11-02T15:47:12Z',
 	},
 	{
 		id: 'g5h6ic',
 		title: 'ARTE China, ABR',
 		url: 'https://test-streams.mux.dev/test_001/stream.m3u8',
-		isPremium: false,
+		isPremium: true,
 		collectedAt: '2025-05-21T08:15:33Z',
 	},
 	{
