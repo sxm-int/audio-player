@@ -39,17 +39,17 @@ export const handlers: MockHandler[] = [
 		method: 'POST',
 		path: '/upgrade',
 		handler: async () => {
-      console.debug('/upgrade');
+			console.debug('/upgrade');
 
 			// simulate network delay
-      const delay = 0;
+			const delay = 0;
 			await new Promise((resolve) => setTimeout(resolve, delay));
 
 			// set to true for success and false for error responses.
 			const success = true;
 			return {
 				status: success ? 'success' : 'error',
-        message: success ? 'Successfully upgraded to premium!' : 'Upgrade failed. Please try again.',
+				message: success ? 'Successfully upgraded to premium!' : 'Upgrade failed. Please try again.',
 			};
 		},
 	},
