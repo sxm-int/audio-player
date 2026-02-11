@@ -1,41 +1,44 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 
 type PremiumModalProps = {
-	open: boolean;
+	isModalOpen: boolean;
 	trackTitle: string;
-	onClose: () => void;
-	onUpgrade: () => Promise<{ status: string; message: string; }>;
-	onSuccess?: () => void;
+	onModalClose: (shouldResumeCurrentTrack: boolean) => void;
+	onUpgradeAttempt: () => Promise<{ status: string; message: string; }>;
+	onUpgradeSuccess?: () => void;
 };
 
 const PremiumModal: React.FC<PremiumModalProps> = ({
-	open,
+	isModalOpen,
 	trackTitle,
-	onClose,
-	onUpgrade,
-	onSuccess,
+	onModalClose,
+	onUpgradeAttempt,
+	onUpgradeSuccess,
 }) => {
 	const [submitting, setSubmitting] = useState(false);
 	const modalRef = useRef<HTMLDivElement>(null);
 	const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const dismissModal = useCallback(() => {
+    onModalClose(true);
+  }, [onModalClose]);
 
 	// Escape key handler
 	useEffect(() => {
-		if (!open) return;
+		if (!isModalOpen) return;
 
 		const handleEscape = (e: KeyboardEvent) => {
 			if (e.key === 'Escape') {
-				onClose();
+				dismissModal();
 			}
 		};
 
 		document.addEventListener('keydown', handleEscape);
 		return () => document.removeEventListener('keydown', handleEscape);
-	}, [open, onClose]);
+	}, [isModalOpen, dismissModal]);
 
 	// Focus trap
 	useEffect(() => {
-		if (!open) return;
+		if (!isModalOpen) return;
 
 		closeButtonRef.current?.focus();
 
@@ -62,27 +65,26 @@ const PremiumModal: React.FC<PremiumModalProps> = ({
 
 		document.addEventListener('keydown', handleTab);
 		return () => document.removeEventListener('keydown', handleTab);
-	}, [open]);
+	}, [isModalOpen]);
 
 	const handleUpgrade = async () => {
 		if (submitting) return;
 
 		try {
 			setSubmitting(true);
-			const result = await onUpgrade();
-			if (result.status === 'success' && onSuccess) {
-				onSuccess();
+			const result = await onUpgradeAttempt();
+			if (result.status === 'success' && onUpgradeSuccess) {
+				onUpgradeSuccess();
 			}
+      onModalClose(result.status === 'error');
+      setSubmitting(false);
 		} catch (err) {
-			console.error('Upgrade failed:', err);
-			throw err;
-		} finally {
-			setSubmitting(false);
-			onClose();
+			console.error('handleUpgrade failed:', err);
+      onModalClose(true);
 		}
 	};
 
-	if (!open) return null;
+	if (!isModalOpen) return null;
 
 	return (
 		<div
@@ -97,7 +99,7 @@ const PremiumModal: React.FC<PremiumModalProps> = ({
 					ref={closeButtonRef}
 					className="premium-close"
 					type="button"
-					onClick={onClose}
+					onClick={dismissModal}
 					aria-label="Close premium modal"
 				>
 					×
