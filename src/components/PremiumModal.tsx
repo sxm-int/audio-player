@@ -37,7 +37,7 @@ const PremiumModal: React.FC<PremiumModalProps> = ({
 	useEffect(() => {
 		if (!open) return;
 
-    closeButtonRef.current?.focus();
+		closeButtonRef.current?.focus();
 
 		const handleTab = (e: KeyboardEvent) => {
 			if (e.key !== 'Tab') return;
@@ -52,11 +52,11 @@ const PremiumModal: React.FC<PremiumModalProps> = ({
 			const lastElement = focusableElements[focusableElements.length - 1];
 
 			if (e.shiftKey && document.activeElement === firstElement) {
-        lastElement?.focus();
-        e.preventDefault();
+				lastElement?.focus();
+				e.preventDefault();
 			} else if (document.activeElement === lastElement) {
-        firstElement?.focus();
-        e.preventDefault();
+				firstElement?.focus();
+				e.preventDefault();
 			}
 		};
 
@@ -65,10 +65,10 @@ const PremiumModal: React.FC<PremiumModalProps> = ({
 	}, [open]);
 
 	const handleUpgrade = async () => {
-    if (submitting) return;
+		if (submitting) return;
 
-    try {
-      setSubmitting(true);
+		try {
+			setSubmitting(true);
 			const result = await onUpgrade();
 			if (result.status === 'success' && onSuccess) {
 				onSuccess();
@@ -77,7 +77,7 @@ const PremiumModal: React.FC<PremiumModalProps> = ({
 			console.error('Upgrade failed:', err);
 			throw err;
 		} finally {
-      setSubmitting(false);
+			setSubmitting(false);
 			onClose();
 		}
 	};
@@ -112,7 +112,7 @@ const PremiumModal: React.FC<PremiumModalProps> = ({
 					className="btn btn-premium"
 					type="button"
 					onClick={handleUpgrade}
-          disabled={submitting}
+					disabled={submitting}
 				>
 					{submitting ? 'Upgrading…' : 'Upgrade Now'}
 				</button>
