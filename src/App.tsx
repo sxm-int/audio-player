@@ -1,13 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { useAppDispatch, useAppSelector } from './hooks';
-import { setUrl } from './store';
+import { setUrl, setUserPremium } from './store';
 import Header from './components/Header';
 import AppBody from './components/AppBody';
 import NowPlaying from './components/NowPlaying';
 import PlaylistSidebar from './components/PlaylistSidebar';
 import Login from './components/Login';
 import Recommendations from './components/Recommendations';
+import PremiumModal from './components/PremiumModal';
+import Toast from './components/Toast';
 import { handleLogin } from './api/login';
+import { handleUpgrade } from './api/upgrade';
 import type { StreamItem } from './api/streams';
 import { useLoadMocks, useAppAudioRef } from './App.hooks';
 import './App.css';
@@ -18,9 +21,20 @@ const App: React.FC = () => {
 		(s) => s.player,
 	);
 	const streams = useAppSelector((s) => s.streams.items);
+	const isUserPremium = useAppSelector((s) => s.auth.isUserPremium);
 	const [tempUrl, setTempUrl] = useState(url);
 	const [loginOpen, setLoginOpen] = useState(false);
-	const activeStream = streams.find((s) => s.url === url);
+	const [premiumModal, setPremiumModal] = useState<{
+		isOpen: boolean;
+		premiumTrack?: StreamItem | null;
+		currentTrack?: StreamItem | null;
+	}>({
+		isOpen: false,
+		premiumTrack: null,
+		currentTrack: null,
+	});
+	const [toast, setToast] = useState<{ message: string; type: string; } | null>(null);
+	const activeStream = streams.find((s) => s.url === url) || null;
 	const audioRef = useAppAudioRef({
 		isPlaying,
 		currentTime,
@@ -32,8 +46,40 @@ const App: React.FC = () => {
 	}, [url]);
 
 	const handlePlay = (item: StreamItem) => {
+		if (item.isPremium && !isUserPremium) {
+			setPremiumModal({
+				isOpen: true,
+				premiumTrack: item,
+			});
+			return;
+		}
+
 		setTempUrl(item.url);
 		dispatch(setUrl(item.url));
+	};
+
+	const handleUpgradeClick = async () => {
+		try {
+			const result = await handleUpgrade();
+			if (result.status === 'success') {
+				dispatch(setUserPremium(true));
+			}
+			setToast({
+				message: result.message,
+				type: result.status,
+			});
+			return result;
+		} catch (err) {
+			const errorMessage = 'An error occurred during upgrade.';
+			setToast({
+				message: errorMessage,
+				type: 'error',
+			});
+			return {
+				status: 'error',
+				message: errorMessage,
+			};
+		}
 	};
 
 	return (
@@ -64,6 +110,34 @@ const App: React.FC = () => {
 				onClose={() => setLoginOpen(false)}
 				onSubmit={handleLogin}
 			/>
+			{premiumModal.isOpen && premiumModal.premiumTrack && (
+				<PremiumModal
+					isModalOpen={premiumModal.isOpen}
+					trackTitle={premiumModal.premiumTrack?.title}
+					onModalClose={(shouldResumeCurrentTrack: boolean) => {
+						const audioEl = audioRef.current;
+						const isAudioPaused = audioEl && audioEl.paused;
+
+						if (shouldResumeCurrentTrack && isAudioPaused) {
+							audioEl.play();
+						}
+
+						setPremiumModal({
+							isOpen: false,
+							premiumTrack: null,
+							currentTrack: null,
+						});
+					}}
+					onUpgradeAttempt={handleUpgradeClick}
+				/>
+			)}
+			{toast && (
+				<Toast
+					message={toast.message}
+					type={toast.type}
+					onClose={() => setToast(null)}
+				/>
+			)}
 		</>
 	);
 };

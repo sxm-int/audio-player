@@ -45,6 +45,9 @@ const PlaylistSidebar: React.FC<PlaylistSidebar> = ({
 						>
 							<div className="row-meta">
 								<div className="row-title">
+									{item.isPremium && (
+										<span className="premium-badge">Premium</span>
+									)}
 									{label}
 								</div>
 								<div className="row-sub">{item.url}</div>
