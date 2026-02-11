@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAppDispatch, useAppSelector } from './hooks';
 import { setUrl, setUserPremium } from './store';
 import HlsAudio from './components/HlsAudio';
@@ -44,6 +44,9 @@ const App: React.FC = () => {
 		requestedTime,
 	});
 	useLoadMocks();
+  useEffect(() => {
+		console.log('Currently playing:', audioRef.current);
+	}, [url]);
 
 	const handlePlay = (item: StreamItem) => {
 		if (item.isPremium && !isUserPremium) {
