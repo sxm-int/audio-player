@@ -1,5 +1,5 @@
 export async function handleUpgrade(): Promise<{
-  status: 'success' | 'error';
+	status: 'success' | 'error';
 	message: string;
 }> {
 	const response = await fetch('/upgrade', {
@@ -11,7 +11,7 @@ export async function handleUpgrade(): Promise<{
 
 	if (!response.ok || !data.status || !data.message) {
 		return {
-      status: 'error',
+			status: 'error',
 			message: 'Upgrade failed. Please try again.',
 		};
 	}
