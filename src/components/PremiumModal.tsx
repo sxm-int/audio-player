@@ -18,9 +18,9 @@ const PremiumModal: React.FC<PremiumModalProps> = ({
 	const [submitting, setSubmitting] = useState(false);
 	const modalRef = useRef<HTMLDivElement>(null);
 	const closeButtonRef = useRef<HTMLButtonElement>(null);
-  const dismissModal = useCallback(() => {
-    onModalClose(true);
-  }, [onModalClose]);
+	const dismissModal = useCallback(() => {
+		onModalClose(true);
+	}, [onModalClose]);
 
 	// Escape key handler
 	useEffect(() => {
@@ -76,11 +76,11 @@ const PremiumModal: React.FC<PremiumModalProps> = ({
 			if (result.status === 'success' && onUpgradeSuccess) {
 				onUpgradeSuccess();
 			}
-      onModalClose(result.status === 'error');
-      setSubmitting(false);
+			onModalClose(result.status === 'error');
+			setSubmitting(false);
 		} catch (err) {
 			console.error('handleUpgrade failed:', err);
-      onModalClose(true);
+			onModalClose(true);
 		}
 	};
 

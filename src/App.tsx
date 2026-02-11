@@ -24,15 +24,15 @@ const App: React.FC = () => {
 	const [tempUrl, setTempUrl] = useState(url);
 	const [listSearchText, setListSearchText] = useState('');
 	const [loginOpen, setLoginOpen] = useState(false);
-  const [premiumModal, setPremiumModal] = useState<{
-    isOpen: boolean;
-    premiumTrack?: StreamItem | null;
-    currentTrack?: StreamItem | null;
-  }>({
-    isOpen: false,
-    premiumTrack: null,
-    currentTrack: null,
-  });
+	const [premiumModal, setPremiumModal] = useState<{
+		isOpen: boolean;
+		premiumTrack?: StreamItem | null;
+		currentTrack?: StreamItem | null;
+	}>({
+		isOpen: false,
+		premiumTrack: null,
+		currentTrack: null,
+	});
 	const [toast, setToast] = useState<{ message: string; type: string; } | null>(null);
 	const filteredStreams = streams.filter((s) => {
 		return s.title.toLowerCase().includes(listSearchText.toLowerCase());
@@ -44,16 +44,16 @@ const App: React.FC = () => {
 		requestedTime,
 	});
 	useLoadMocks();
-  useEffect(() => {
+	useEffect(() => {
 		console.log('Currently playing:', audioRef.current);
 	}, [url]);
 
 	const handlePlay = (item: StreamItem) => {
 		if (item.isPremium && !isUserPremium) {
-      setPremiumModal({
-        isOpen: true,
-        premiumTrack: item,
-      });
+			setPremiumModal({
+				isOpen: true,
+				premiumTrack: item,
+			});
 			return;
 		}
 
@@ -214,19 +214,19 @@ const App: React.FC = () => {
 					isModalOpen={premiumModal.isOpen}
 					trackTitle={premiumModal.premiumTrack?.title}
 					onModalClose={(shouldResumeCurrentTrack: boolean) => {
-            const audioEl = audioRef.current;
-            const isAudioPaused = audioEl && audioEl.paused;
+						const audioEl = audioRef.current;
+						const isAudioPaused = audioEl && audioEl.paused;
 
-            if (shouldResumeCurrentTrack && isAudioPaused) {
-              audioEl.play();
-            }
+						if (shouldResumeCurrentTrack && isAudioPaused) {
+							audioEl.play();
+						}
 
-            setPremiumModal({
-              isOpen: false,
-              premiumTrack: null,
-              currentTrack: null,
-            });
-          }}
+						setPremiumModal({
+							isOpen: false,
+							premiumTrack: null,
+							currentTrack: null,
+						});
+					}}
 					onUpgradeAttempt={handleUpgradeClick}
 				/>
 			)}
