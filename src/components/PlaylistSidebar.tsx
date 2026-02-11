@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 
 import type { StreamItem } from '../api/streams';
 
+type SortListBy = 'recent' | 'a-to-z';
+
 type PlaylistSidebar = {
 	streams: StreamItem[];
 	url: string;
@@ -18,11 +20,29 @@ const PlaylistSidebar: React.FC<PlaylistSidebar> = ({
 		return s.title.toLowerCase().includes(listSearchText.toLowerCase());
 	});
 
+	const handleSort = (sort: SortListBy) =>  {};
+
+	const handleDelete = (item: StreamItem) => {};
+
 	return (
 		<aside className="sidebar">
 			<div className="sidebar-head">
 				<div className="row">
 					<h2>Playlist</h2>
+				  <div className='sort'>
+					  <button
+						  className={'btn'}
+						  onClick={() => handleSort('recent')}
+					  >
+						  Recent
+					  </button>
+					  <button
+						  className={'btn'}
+						  onClick={() => handleSort('a-to-z')}
+					  >
+						  A to Z
+					  </button>
+				  </div>
 				</div>
 				<input
 					className="input slim"
@@ -57,6 +77,13 @@ const PlaylistSidebar: React.FC<PlaylistSidebar> = ({
 								<span className={`chip ${active ? 'playing' : ''}`}>
 									{active ? 'Playing' : 'Play'}
 								</span>
+							</button>
+							<button
+								className={'btn-chip'}
+								onClick={() => handleDelete(item)}
+								title={'Remove'}
+							>
+								<span className="chip">Remove</span>
 							</button>
 						</li>
 					);
