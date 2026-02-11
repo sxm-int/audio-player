@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useAppDispatch, useAppSelector } from './hooks';
 import { setUrl, setUserPremium } from './store';
 import HlsAudio from './components/HlsAudio';
@@ -24,27 +24,33 @@ const App: React.FC = () => {
 	const [tempUrl, setTempUrl] = useState(url);
 	const [listSearchText, setListSearchText] = useState('');
 	const [loginOpen, setLoginOpen] = useState(false);
-	const [premiumModalOpen, setPremiumModalOpen] = useState(false);
-	const [selectedPremiumTrack, setSelectedPremiumTrack] = useState<StreamItem | null>(null);
+  const [premiumModal, setPremiumModal] = useState<{
+    isOpen: boolean;
+    premiumTrack?: StreamItem | null;
+    currentTrack?: StreamItem | null;
+  }>({
+    isOpen: false,
+    premiumTrack: null,
+    currentTrack: null,
+  });
 	const [toast, setToast] = useState<{ message: string; type: string; } | null>(null);
 	const filteredStreams = streams.filter((s) => {
 		return s.title.toLowerCase().includes(listSearchText.toLowerCase());
 	});
-	const activeStream = streams.find((s) => s.url === url);
+	const activeStream = streams.find((s) => s.url === url) || null;
 	const audioRef = useAppAudioRef({
 		isPlaying,
 		currentTime,
 		requestedTime,
 	});
 	useLoadMocks();
-	useEffect(() => {
-		console.log('Currently playing:', audioRef.current);
-	}, [url]);
 
 	const handlePlay = (item: StreamItem) => {
 		if (item.isPremium && !isUserPremium) {
-			setSelectedPremiumTrack(item);
-			setPremiumModalOpen(true);
+      setPremiumModal({
+        isOpen: true,
+        premiumTrack: item,
+      });
 			return;
 		}
 
@@ -200,13 +206,25 @@ const App: React.FC = () => {
         onClose={() => setLoginOpen(false)}
         onSubmit={handleLogin}
       />
-			{premiumModalOpen && selectedPremiumTrack && (
+			{premiumModal.isOpen && premiumModal.premiumTrack && (
 				<PremiumModal
-					open={premiumModalOpen}
-					trackTitle={selectedPremiumTrack?.title}
-					onClose={() => setPremiumModalOpen(false)}
-					onUpgrade={handleUpgradeClick}
-					onSuccess={() => setSelectedPremiumTrack(null)}
+					isModalOpen={premiumModal.isOpen}
+					trackTitle={premiumModal.premiumTrack?.title}
+					onModalClose={(shouldResumeCurrentTrack: boolean) => {
+            const audioEl = audioRef.current;
+            const isAudioPaused = audioEl && audioEl.paused;
+
+            if (shouldResumeCurrentTrack && isAudioPaused) {
+              audioEl.play();
+            }
+
+            setPremiumModal({
+              isOpen: false,
+              premiumTrack: null,
+              currentTrack: null,
+            });
+          }}
+					onUpgradeAttempt={handleUpgradeClick}
 				/>
 			)}
 			{toast && (
