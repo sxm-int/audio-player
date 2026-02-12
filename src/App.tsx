@@ -27,11 +27,9 @@ const App: React.FC = () => {
 	const [premiumModal, setPremiumModal] = useState<{
 		isOpen: boolean;
 		premiumTrack?: StreamItem | null;
-		currentTrack?: StreamItem | null;
 	}>({
 		isOpen: false,
 		premiumTrack: null,
-		currentTrack: null,
 	});
 	const [toast, setToast] = useState<{ message: string; type: string; } | null>(null);
 	const activeStream = streams.find((s) => s.url === url) || null;
@@ -114,18 +112,10 @@ const App: React.FC = () => {
 				<PremiumModal
 					isModalOpen={premiumModal.isOpen}
 					trackTitle={premiumModal.premiumTrack?.title}
-					onModalClose={(shouldResumeCurrentTrack: boolean) => {
-						const audioEl = audioRef.current;
-						const isAudioPaused = audioEl && audioEl.paused;
-
-						if (shouldResumeCurrentTrack && isAudioPaused) {
-							audioEl.play();
-						}
-
+					onModalClose={() => {
 						setPremiumModal({
 							isOpen: false,
 							premiumTrack: null,
-							currentTrack: null,
 						});
 					}}
 					onUpgradeAttempt={handleUpgradeClick}

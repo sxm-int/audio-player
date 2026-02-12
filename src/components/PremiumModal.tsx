@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 type PremiumModalProps = {
 	isModalOpen: boolean;
 	trackTitle: string;
-	onModalClose: (shouldResumeCurrentTrack: boolean) => void;
+	onModalClose: () => void;
 	onUpgradeAttempt: () => Promise<{ status: string; message: string; }>;
 	onUpgradeSuccess?: () => void;
 };
@@ -19,7 +19,7 @@ const PremiumModal: React.FC<PremiumModalProps> = ({
 	const modalRef = useRef<HTMLDivElement>(null);
 	const closeButtonRef = useRef<HTMLButtonElement>(null);
 	const dismissModal = useCallback(() => {
-		onModalClose(true);
+		onModalClose();
 	}, [onModalClose]);
 
 	// Escape key handler
@@ -76,11 +76,11 @@ const PremiumModal: React.FC<PremiumModalProps> = ({
 			if (result.status === 'success' && onUpgradeSuccess) {
 				onUpgradeSuccess();
 			}
-			onModalClose(result.status === 'error');
+			onModalClose();
 			setSubmitting(false);
 		} catch (err) {
 			console.error('handleUpgrade failed:', err);
-			onModalClose(true);
+			onModalClose();
 		}
 	};
 
