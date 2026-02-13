@@ -6,9 +6,10 @@ type LoginResult = { success: boolean; error?: string };
 type LoginProps = {
 	open: boolean;
 	onClose: () => void;
-	onSubmit?: (
-		credentials: { email: string; password: string },
-	) => Promise<LoginResult | void> | LoginResult | void;
+	onSubmit?: (credentials: {
+		email: string;
+		password: string;
+	}) => Promise<LoginResult | void> | LoginResult | void;
 };
 
 const Login: React.FC<LoginProps> = ({ open, onClose, onSubmit }) => {
@@ -39,7 +40,7 @@ const Login: React.FC<LoginProps> = ({ open, onClose, onSubmit }) => {
 			const result = await onSubmit({ email, password });
 			if (result && (result.success === false || result.error)) {
 				setError(
-					result.error ?? 'Unable to sign in with those credentials. Try again.',
+					result.error ?? 'Unable to log in with those credentials. Try again.',
 				);
 				return;
 			}
@@ -63,9 +64,10 @@ const Login: React.FC<LoginProps> = ({ open, onClose, onSubmit }) => {
 				>
 					×
 				</button>
-				<h2>Sign in</h2>
+				<h2>Log In</h2>
 				<p className="login-sub">
-					Access curated streams with your SiriusXM credentials. The email and password are <b>"{VALID_EMAIL}"</b> and <b>"{VALID_PASS}"</b>
+					Access curated streams with your SiriusXM credentials. The email and
+					password are <b>"{VALID_EMAIL}"</b> and <b>"{VALID_PASS}"</b>
 				</p>
 				<form className="login-form" onSubmit={handleSubmit}>
 					<label>
@@ -75,7 +77,6 @@ const Login: React.FC<LoginProps> = ({ open, onClose, onSubmit }) => {
 							required
 							value={email}
 							onChange={(event) => setEmail(event.target.value)}
-							placeholder="you@example.com"
 						/>
 					</label>
 					<label>
@@ -84,7 +85,6 @@ const Login: React.FC<LoginProps> = ({ open, onClose, onSubmit }) => {
 							required
 							value={password}
 							onChange={(event) => setPassword(event.target.value)}
-							placeholder="my-password"
 						/>
 					</label>
 					{error && (
@@ -97,7 +97,7 @@ const Login: React.FC<LoginProps> = ({ open, onClose, onSubmit }) => {
 							Cancel
 						</button>
 						<button className="btn" type="submit" disabled={submitting}>
-							{submitting ? 'Signing in…' : 'Sign in'}
+							{submitting ? 'Logging in…' : 'Log in'}
 						</button>
 					</div>
 				</form>

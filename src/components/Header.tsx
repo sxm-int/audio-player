@@ -8,11 +8,7 @@ type Header = {
 	setLoginOpen: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
-const Header: React.FC<Header> = ({
-	tempUrl,
-	setTempUrl,
-	setLoginOpen,
-}) => {
+const Header: React.FC<Header> = ({ tempUrl, setTempUrl, setLoginOpen }) => {
 	const dispatch = useAppDispatch();
 
 	return (
@@ -52,7 +48,7 @@ const Header: React.FC<Header> = ({
 					type="button"
 					onClick={() => setLoginOpen(true)}
 				>
-					Sign in
+					Log In
 				</button>
 			</div>
 		</header>
