@@ -97,7 +97,7 @@ const Login: React.FC<LoginProps> = ({ open, onClose, onSubmit }) => {
 							Cancel
 						</button>
 						<button className="btn" type="submit" disabled={submitting}>
-							{submitting ? 'Logging in…' : 'Log in'}
+							{submitting ? 'Logging in…' : 'Log In'}
 						</button>
 					</div>
 				</form>
