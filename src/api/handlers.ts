@@ -4,7 +4,7 @@ import { VALID_EMAIL, VALID_PASS } from '../constants';
 export interface MockHandler {
 	method: string;
 	path: string;
-	handler: (body?: unknown) => unknown;
+	handler: (body?: unknown) => unknown | Promise<unknown>;
 }
 
 export const handlers: MockHandler[] = [
@@ -32,6 +32,24 @@ export const handlers: MockHandler[] = [
 			return {
 				success,
 				...(success ? { user: { email } } : { error: 'Invalid credentials' }),
+			};
+		},
+	},
+	{
+		method: 'POST',
+		path: '/upgrade',
+		handler: async () => {
+			console.debug('/upgrade');
+
+			// simulate network delay
+			const delay = 0;
+			await new Promise((resolve) => setTimeout(resolve, delay));
+
+			// set to true for success and false for error responses.
+			const success = true;
+			return {
+				status: success ? 'success' : 'error',
+				message: success ? 'Successfully upgraded to premium!' : 'Upgrade failed. Please try again.',
 			};
 		},
 	},
