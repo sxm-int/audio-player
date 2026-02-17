@@ -35,8 +35,7 @@ Add PASS or FAIL to each step
    - Modal closes
    - Toast shows success message (auto-dismisses in 5 seconds)
 
-### Upgrade Error Path 
-NOTE: Modify `/upgrade` endpoint in handlers.ts to return an error.
+### Upgrade Error Path (NOTE: Modify `/upgrade` endpoint in handlers.ts to return an error.)
 6. **Click "Upgrade Now"** → Button text changes to 'Upgrading...'
    - Premium track does NOT play
    - Modal closes
