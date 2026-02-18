@@ -20,7 +20,7 @@ const initialState: PlayerState = {
 	status: 'idle',
 	isPlaying: false,
 	muted: false,
-	volume: 1,
+	volume: 0.07,
 	duration: 0,
 	currentTime: 0,
 	isLive: false,
