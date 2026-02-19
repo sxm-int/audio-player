@@ -39,14 +39,15 @@ const App: React.FC = () => {
 	return (
 		<>
 			<div className="shell">
-				<Header setLoginOpen={setLoginOpen} tempUrl={tempUrl} setTempUrl={setTempUrl} />
+				<Header
+					setLoginOpen={setLoginOpen}
+					tempUrl={tempUrl}
+					setTempUrl={setTempUrl}
+				/>
 				<AppBody
 					MainContent={
 						<>
-							<NowPlaying
-								url={url}
-								title={activeStream?.title}
-							/>
+							<NowPlaying url={url} title={activeStream?.title} />
 							<Recommendations />
 						</>
 					}

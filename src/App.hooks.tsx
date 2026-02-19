@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import { setStreams, setCurrentTime, setRequestedTime } from './store';
 import { useAppDispatch } from './hooks';
 import type { StreamItem } from './api/streams';
+import { loggedFetch } from './lib/loggedFetch';
 
 async function waitForMocks(ms = 800, step = 40) {
 	if (!import.meta.env.DEV) return;
@@ -29,7 +30,7 @@ export const useLoadMocks = () => {
 			let lastErr: unknown;
 			for (let attempt = 0; attempt < 3; attempt++) {
 				try {
-					const res = await fetch('/streams', { cache: 'no-store' });
+					const res = await loggedFetch('/streams', { cache: 'no-store' });
 					const ctype = res.headers.get('content-type') || '';
 					if (!res.ok) throw new Error(`GET /streams ${res.status}`);
 					if (!ctype.includes('application/json')) {
