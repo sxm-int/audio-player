@@ -18,228 +18,197 @@ describe('HlsPlayerEngine', () => {
     fireMediaAttached = () => mediaAttachedHandler!();
   });
 
-  it('calls attachMedia with the audio element on construction', () => {
-    expect(hls.attachMedia).toHaveBeenCalledWith(audio);
-  });
-
-  it('calls loadSource immediately if media is already attached', () => {
-    fireMediaAttached();
-    service.load('https://example.com/stream.m3u8');
-    expect(hls.loadSource).toHaveBeenCalledWith('https://example.com/stream.m3u8');
-  });
-
-  it('defers loadSource until MEDIA_ATTACHED fires', () => {
-    service.load('https://example.com/stream.m3u8');
-    expect(hls.loadSource).not.toHaveBeenCalled();
-    fireMediaAttached();
-    expect(hls.loadSource).toHaveBeenCalledWith('https://example.com/stream.m3u8');
-  });
-
-  it('throws if load is called a second time', () => {
-    fireMediaAttached();
-    service.load('https://example.com/stream.m3u8');
-    expect(() => service.load('https://example.com/other.m3u8')).toThrow();
-  });
-
-  it('calls destroy on hls when destroyed', () => {
-    service.destroy();
-    expect(hls.destroy).toHaveBeenCalled();
-  });
-
-  it('throws if load is called after destroy', () => {
-    service.destroy();
-    expect(() => service.load('https://example.com/stream.m3u8')).toThrow();
-  });
-
-  it('calls play on the audio element', () => {
-    audio.play = vi.fn();
-    service.play();
-    expect(audio.play).toHaveBeenCalled();
-  });
-
-  it('calls pause on the audio element', () => {
-    audio.pause = vi.fn();
-    service.pause();
-    expect(audio.pause).toHaveBeenCalled();
-  });
-
-  it('sets currentTime on the audio element when seeking', () => {
-    service.seek(30);
-    expect(audio.currentTime).toBe(30);
-  });
-
-  it('sets volume on the audio element', () => {
-    service.setVolume(0.5);
-    expect(audio.volume).toBe(0.5);
-  });
-
-  it('sets muted on the audio element', () => {
-    service.setMuted(true);
-    expect(audio.muted).toBe(true);
-  });
-
-  it('has an on method', () => {
-    expect(typeof service.on).toBe('function');
-  });
-
-  it('has an off method', () => {
-    expect(typeof service.off).toBe('function');
-  });
-
-  it('does not call handler after off is called', () => {
-    const handler = vi.fn();
-    service.on('loading', handler);
-    service.off('loading', handler);
-    service.load('https://example.com/stream.m3u8');
-    expect(handler).not.toHaveBeenCalled();
-  });
-
-  it('does not emit any audio events after destroy', () => {
-    const events = ['playing', 'paused', 'ended', 'timeupdate', 'durationchange', 'volumechange', 'mutedchange', 'buffering', 'seeking', 'seeked'];
-    const handlers = events.map((event) => {
-      const handler = vi.fn();
-      service.on(event, handler);
-      return handler;
+  describe('construction', () => {
+    it('calls attachMedia with the audio element', () => {
+      expect(hls.attachMedia).toHaveBeenCalledWith(audio);
     });
-    service.destroy();
-    audio.dispatchEvent(new Event('play'));
-    audio.dispatchEvent(new Event('pause'));
-    audio.dispatchEvent(new Event('ended'));
-    audio.dispatchEvent(new Event('timeupdate'));
-    audio.dispatchEvent(new Event('durationchange'));
-    audio.dispatchEvent(new Event('volumechange'));
-    audio.dispatchEvent(new Event('waiting'));
-    audio.dispatchEvent(new Event('seeking'));
-    audio.dispatchEvent(new Event('seeked'));
-    handlers.forEach((handler) => expect(handler).not.toHaveBeenCalled());
   });
 
-  it('emits ended when audio ended event fires', () => {
-    const handler = vi.fn();
-    service.on('ended', handler);
-    audio.dispatchEvent(new Event('ended'));
-    expect(handler).toHaveBeenCalled();
+  describe('load', () => {
+    it('calls loadSource immediately if media is already attached', () => {
+      fireMediaAttached();
+      service.load('https://example.com/stream.m3u8');
+      expect(hls.loadSource).toHaveBeenCalledWith('https://example.com/stream.m3u8');
+    });
+
+    it('defers loadSource until MEDIA_ATTACHED fires', () => {
+      service.load('https://example.com/stream.m3u8');
+      expect(hls.loadSource).not.toHaveBeenCalled();
+      fireMediaAttached();
+      expect(hls.loadSource).toHaveBeenCalledWith('https://example.com/stream.m3u8');
+    });
+
+    it('throws if load is called a second time', () => {
+      fireMediaAttached();
+      service.load('https://example.com/stream.m3u8');
+      expect(() => service.load('https://example.com/other.m3u8')).toThrow();
+    });
+
+    it('throws if load is called after destroy', () => {
+      service.destroy();
+      expect(() => service.load('https://example.com/stream.m3u8')).toThrow();
+    });
+
+    it('emits a loading event on events$ when load is called', () => {
+      const next = vi.fn();
+      service.events$.subscribe(next);
+      service.load('https://example.com/stream.m3u8');
+      expect(next).toHaveBeenCalledWith({ type: 'loading' });
+    });
+
+    it('emits volumeChanged on events$ with initial volume on load', () => {
+      const next = vi.fn();
+      service.events$.subscribe(next);
+      Object.defineProperty(audio, 'volume', { value: 0.5, configurable: true });
+      service.load('https://example.com/stream.m3u8');
+      expect(next).toHaveBeenCalledWith({ type: 'volumeChanged', volume: 0.5 });
+    });
+
+    it('emits mutedChanged on events$ with initial muted on load', () => {
+      const next = vi.fn();
+      service.events$.subscribe(next);
+      Object.defineProperty(audio, 'muted', { value: true, configurable: true });
+      service.load('https://example.com/stream.m3u8');
+      expect(next).toHaveBeenCalledWith({ type: 'mutedChanged', muted: true });
+    });
   });
 
-  it('emits paused when audio pause event fires', () => {
-    const handler = vi.fn();
-    service.on('paused', handler);
-    audio.dispatchEvent(new Event('pause'));
-    expect(handler).toHaveBeenCalled();
+  describe('playback controls', () => {
+    it('calls play on the audio element', () => {
+      audio.play = vi.fn();
+      service.play();
+      expect(audio.play).toHaveBeenCalled();
+    });
+
+    it('calls pause on the audio element', () => {
+      audio.pause = vi.fn();
+      service.pause();
+      expect(audio.pause).toHaveBeenCalled();
+    });
+
+    it('sets currentTime on the audio element when seeking', () => {
+      service.seek(30);
+      expect(audio.currentTime).toBe(30);
+    });
+
+    it('sets volume on the audio element', () => {
+      service.setVolume(0.5);
+      expect(audio.volume).toBe(0.5);
+    });
+
+    it('sets muted on the audio element', () => {
+      service.setMuted(true);
+      expect(audio.muted).toBe(true);
+    });
   });
 
-  it('emits playing when audio play event fires', () => {
-    const handler = vi.fn();
-    service.on('playing', handler);
-    audio.dispatchEvent(new Event('play'));
-    expect(handler).toHaveBeenCalled();
+  describe('destroy', () => {
+    it('calls destroy on hls when destroyed', () => {
+      service.destroy();
+      expect(hls.destroy).toHaveBeenCalled();
+    });
+
+    it('completes events$ when destroyed', () => {
+      const complete = vi.fn();
+      service.events$.subscribe({ complete });
+      service.destroy();
+      expect(complete).toHaveBeenCalled();
+    });
   });
 
-  it('does not emit timeupdate after destroy', () => {
-    const handler = vi.fn();
-    service.on('timeupdate', handler);
-    service.destroy();
-    audio.dispatchEvent(new Event('timeupdate'));
-    expect(handler).not.toHaveBeenCalled();
-  });
+  describe('events$', () => {
+    it('exposes an events$ observable', () => {
+      expect(service.events$).toBeDefined();
+    });
 
-  it('emits timeupdate with current time when audio timeupdate event fires', () => {
-    const handler = vi.fn();
-    service.on('timeupdate', handler);
-    Object.defineProperty(audio, 'currentTime', { value: 42, configurable: true });
-    audio.dispatchEvent(new Event('timeupdate'));
-    expect(handler).toHaveBeenCalledWith(42);
-  });
+    it('emits playbackStateChanged playing when audio play event fires', () => {
+      const next = vi.fn();
+      service.events$.subscribe(next);
+      audio.dispatchEvent(new Event('play'));
+      expect(next).toHaveBeenCalledWith({ type: 'playbackStateChanged', state: 'playing' });
+    });
 
-  it('does not emit durationchange after destroy', () => {
-    const handler = vi.fn();
-    service.on('durationchange', handler);
-    service.destroy();
-    audio.dispatchEvent(new Event('durationchange'));
-    expect(handler).not.toHaveBeenCalled();
-  });
+    it('emits playbackStateChanged paused when audio pause event fires', () => {
+      const next = vi.fn();
+      service.events$.subscribe(next);
+      audio.dispatchEvent(new Event('pause'));
+      expect(next).toHaveBeenCalledWith({ type: 'playbackStateChanged', state: 'paused' });
+    });
 
-  it('emits durationchange with duration when audio durationchange event fires', () => {
-    const handler = vi.fn();
-    service.on('durationchange', handler);
-    Object.defineProperty(audio, 'duration', { value: 120, configurable: true });
-    audio.dispatchEvent(new Event('durationchange'));
-    expect(handler).toHaveBeenCalledWith(120);
-  });
+    it('emits playbackStateChanged ended when audio ended event fires', () => {
+      const next = vi.fn();
+      service.events$.subscribe(next);
+      audio.dispatchEvent(new Event('ended'));
+      expect(next).toHaveBeenCalledWith({ type: 'playbackStateChanged', state: 'ended' });
+    });
 
-  it('emits seeking when audio seeking event fires', () => {
-    const handler = vi.fn();
-    service.on('seeking', handler);
-    audio.dispatchEvent(new Event('seeking'));
-    expect(handler).toHaveBeenCalled();
-  });
+    it('emits playbackStateChanged buffering when audio waiting event fires', () => {
+      const next = vi.fn();
+      service.events$.subscribe(next);
+      audio.dispatchEvent(new Event('waiting'));
+      expect(next).toHaveBeenCalledWith({ type: 'playbackStateChanged', state: 'buffering' });
+    });
 
-  it('emits seeked when audio seeked event fires', () => {
-    const handler = vi.fn();
-    service.on('seeked', handler);
-    audio.dispatchEvent(new Event('seeked'));
-    expect(handler).toHaveBeenCalled();
-  });
+    it('emits seeking when audio seeking event fires', () => {
+      const next = vi.fn();
+      service.events$.subscribe(next);
+      audio.dispatchEvent(new Event('seeking'));
+      expect(next).toHaveBeenCalledWith({ type: 'seeking' });
+    });
 
-  it('emits buffering when audio waiting event fires', () => {
-    const handler = vi.fn();
-    service.on('buffering', handler);
-    audio.dispatchEvent(new Event('waiting'));
-    expect(handler).toHaveBeenCalled();
-  });
+    it('emits seeked when audio seeked event fires', () => {
+      const next = vi.fn();
+      service.events$.subscribe(next);
+      audio.dispatchEvent(new Event('seeked'));
+      expect(next).toHaveBeenCalledWith({ type: 'seeked' });
+    });
 
-  it('emits volumechange with initial volume on load', () => {
-    const handler = vi.fn();
-    service.on('volumechange', handler);
-    Object.defineProperty(audio, 'volume', { value: 0.5, configurable: true });
-    service.load('https://example.com/stream.m3u8');
-    expect(handler).toHaveBeenCalledWith(0.5);
-  });
+    it('emits currentTimeChanged with currentTime when audio timeupdate event fires', () => {
+      const next = vi.fn();
+      service.events$.subscribe(next);
+      Object.defineProperty(audio, 'currentTime', { value: 42, configurable: true });
+      audio.dispatchEvent(new Event('timeupdate'));
+      expect(next).toHaveBeenCalledWith({ type: 'currentTimeChanged', currentTime: 42 });
+    });
 
-  it('emits mutedchange with initial muted on load', () => {
-    const handler = vi.fn();
-    service.on('mutedchange', handler);
-    Object.defineProperty(audio, 'muted', { value: true, configurable: true });
-    service.load('https://example.com/stream.m3u8');
-    expect(handler).toHaveBeenCalledWith(true);
-  });
+    it('emits durationChanged with duration when audio durationchange event fires', () => {
+      const next = vi.fn();
+      service.events$.subscribe(next);
+      Object.defineProperty(audio, 'duration', { value: 120, configurable: true });
+      audio.dispatchEvent(new Event('durationchange'));
+      expect(next).toHaveBeenCalledWith({ type: 'durationChanged', duration: 120 });
+    });
 
-  it('emits loading when load is called', () => {
-    const handler = vi.fn();
-    service.on('loading', handler);
-    service.load('https://example.com/stream.m3u8');
-    expect(handler).toHaveBeenCalled();
-  });
+    it('emits volumeChanged with volume when audio volumechange event fires', () => {
+      const next = vi.fn();
+      service.events$.subscribe(next);
+      Object.defineProperty(audio, 'volume', { value: 0.8, configurable: true });
+      audio.dispatchEvent(new Event('volumechange'));
+      expect(next).toHaveBeenCalledWith({ type: 'volumeChanged', volume: 0.8 });
+    });
 
-  it('emits volumechange with volume when audio volumechange event fires', () => {
-    const handler = vi.fn();
-    service.on('volumechange', handler);
-    Object.defineProperty(audio, 'volume', { value: 0.8, configurable: true });
-    audio.dispatchEvent(new Event('volumechange'));
-    expect(handler).toHaveBeenCalledWith(0.8);
-  });
+    it('does not emit volumeChanged if volume did not change', () => {
+      const next = vi.fn();
+      service.events$.subscribe(next);
+      audio.dispatchEvent(new Event('volumechange'));
+      audio.dispatchEvent(new Event('volumechange'));
+      expect(next).not.toHaveBeenCalledWith(expect.objectContaining({ type: 'volumeChanged' }));
+    });
 
-  it('does not emit volumechange if volume did not change', () => {
-    const handler = vi.fn();
-    service.on('volumechange', handler);
-    audio.dispatchEvent(new Event('volumechange'));
-    audio.dispatchEvent(new Event('volumechange'));
-    expect(handler).not.toHaveBeenCalled();
-  });
+    it('emits mutedChanged with muted when audio volumechange event fires', () => {
+      const next = vi.fn();
+      service.events$.subscribe(next);
+      Object.defineProperty(audio, 'muted', { value: true, configurable: true });
+      audio.dispatchEvent(new Event('volumechange'));
+      expect(next).toHaveBeenCalledWith({ type: 'mutedChanged', muted: true });
+    });
 
-  it('does not emit mutedchange if muted did not change', () => {
-    const handler = vi.fn();
-    service.on('mutedchange', handler);
-    audio.dispatchEvent(new Event('volumechange'));
-    audio.dispatchEvent(new Event('volumechange'));
-    expect(handler).not.toHaveBeenCalled();
-  });
-
-  it('emits mutedchange with muted when audio volumechange event fires', () => {
-    const handler = vi.fn();
-    service.on('mutedchange', handler);
-    Object.defineProperty(audio, 'muted', { value: true, configurable: true });
-    audio.dispatchEvent(new Event('volumechange'));
-    expect(handler).toHaveBeenCalledWith(true);
+    it('does not emit mutedChanged if muted did not change', () => {
+      const next = vi.fn();
+      service.events$.subscribe(next);
+      audio.dispatchEvent(new Event('volumechange'));
+      audio.dispatchEvent(new Event('volumechange'));
+      expect(next).not.toHaveBeenCalledWith(expect.objectContaining({ type: 'mutedChanged' }));
+    });
   });
 });
