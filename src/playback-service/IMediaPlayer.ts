@@ -1,6 +1,8 @@
 import type { Observable } from 'rxjs';
 import type { PlaybackEvent } from './PlaybackTypes';
 
+export type EngineFactory = (audio: HTMLAudioElement) => IMediaPlayer;
+
 export interface IMediaPlayer {
   events$: Observable<PlaybackEvent>;
   load(url: string): void;

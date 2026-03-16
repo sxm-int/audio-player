@@ -1,10 +1,8 @@
 import { Subject } from 'rxjs';
 import type { Observable } from 'rxjs';
 import type { PlaybackItem } from './PlaybackTypes';
-import type { IMediaPlayer } from './IMediaPlayer';
+import type { IMediaPlayer, EngineFactory } from './IMediaPlayer';
 import type { PlaybackEvent } from './PlaybackTypes';
-
-type EngineFactory = (audio: HTMLAudioElement) => IMediaPlayer;
 
 export class PlaybackService {
   private audio: HTMLAudioElement;
