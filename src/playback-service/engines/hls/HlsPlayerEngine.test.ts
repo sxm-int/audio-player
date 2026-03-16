@@ -114,6 +114,14 @@ describe('HlsPlayerEngine', () => {
       service.destroy();
       expect(complete).toHaveBeenCalled();
     });
+
+    it('clears audio src and calls load when destroyed', () => {
+      audio.load = vi.fn();
+      audio.src = 'https://example.com/stream.m3u8';
+      service.destroy();
+      expect(audio.hasAttribute('src')).toBe(false);
+      expect(audio.load).toHaveBeenCalled();
+    });
   });
 
   describe('events$', () => {

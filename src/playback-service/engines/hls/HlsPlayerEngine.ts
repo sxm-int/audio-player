@@ -1,25 +1,17 @@
 import { Subject, fromEvent } from 'rxjs';
 import { distinctUntilChanged, map, skip, startWith, takeUntil } from 'rxjs/operators';
 import type { IHls } from './IHls';
+import type { IMediaPlayer } from '../../IMediaPlayer';
+import type { PlaybackEvent } from '../../PlaybackTypes';
 
-export type HlsPlayerEvent =
-  | { type: 'loading' }
-  | { type: 'playbackStateChanged'; state: 'playing' | 'paused' | 'ended' | 'buffering' }
-  | { type: 'currentTimeChanged'; currentTime: number }
-  | { type: 'durationChanged'; duration: number }
-  | { type: 'volumeChanged'; volume: number }
-  | { type: 'mutedChanged'; muted: boolean }
-  | { type: 'seeking' }
-  | { type: 'seeked' };
-
-export class HlsPlayerEngine {
+export class HlsPlayerEngine implements IMediaPlayer {
   private audio: HTMLAudioElement;
   private hls: IHls | null;
   private mediaAttached = false;
   private pendingUrl: string | null = null;
   private loaded = false;
   private destroy$ = new Subject<void>();
-  readonly events$ = new Subject<HlsPlayerEvent>();
+  readonly events$ = new Subject<PlaybackEvent>();
 
   constructor(audio: HTMLAudioElement, hls: IHls) {
     this.audio = audio;
@@ -116,5 +108,7 @@ export class HlsPlayerEngine {
     this.events$.complete();
     this.hls?.destroy();
     this.hls = null;
+    this.audio.removeAttribute('src');
+    this.audio.load();
   }
 }
