@@ -63,4 +63,11 @@ export const streams: StreamItem[] = [
 		isPremium: true,
 		collectedAt: '2025-06-09T13:41:55Z',
 	},
+	{
+		id: 'y7z8ai',
+		title: 'SoundHelix Song 1',
+		url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
+		isPremium: false,
+		collectedAt: '2026-01-15T16:52:09Z',
+	},
 ];

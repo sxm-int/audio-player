@@ -27,7 +27,7 @@ const Visualizer: React.FC<Props> = ({
 	useEffect(() => {
 		const canvas = canvasRef.current;
 		if (!canvas) return;
-		const audioEl = document.querySelector('audio') as HTMLAudioElement | null;
+		const audioEl = document.getElementById('player-hls') as HTMLAudioElement | null;
 		if (!audioEl) return;
 
 		// Reuse a single AudioContext
