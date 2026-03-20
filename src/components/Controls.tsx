@@ -9,25 +9,16 @@ const Controls: React.FC = () => {
     useAppSelector((s) => s.player);
   const service = usePlaybackService();
 
-  // Local scrub state so we don't seek continuously during drag
   const [scrub, setScrub] = React.useState<number | null>(null);
   const dragging = React.useRef(false);
-  const seekPending = React.useRef(false);
 
   const commitScrub = React.useCallback(() => {
     dragging.current = false;
     if (scrub != null) {
-      seekPending.current = true;
       service.seek(scrub);
-    }
-  }, [service, scrub]);
-
-  React.useEffect(() => {
-    if (seekPending.current) {
-      seekPending.current = false;
       setScrub(null);
     }
-  }, [currentTime]);
+  }, [service, scrub]);
 
   return (
     <div className="controls">
@@ -53,6 +44,20 @@ const Controls: React.FC = () => {
         {(muted) && (
           <button className="btn" onClick={() => service.setMuted(false)}>Unmute</button>
         )}
+
+        {/*
+          Playback rate hint:
+          - Set rate:   const audio = document.querySelector('audio'); audio.playbackRate = 1.5;
+          - Listen for changes: audio.addEventListener('ratechange', () => { console.log(audio.playbackRate); })
+        */}
+        <select onChange={(e) => { }} value={1}>
+          <option value={0.5}>0.5x</option>
+          <option value={0.75}>0.75x</option>
+          <option value={1}>1x</option>
+          <option value={1.25}>1.25x</option>
+          <option value={1.5}>1.5x</option>
+          <option value={2}>2x</option>
+        </select>
 
         <span className="status">{playbackState}</span>
       </div>
