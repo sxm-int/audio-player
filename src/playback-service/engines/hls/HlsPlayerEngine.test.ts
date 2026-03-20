@@ -3,19 +3,25 @@ import { HlsPlayerEngine } from './HlsPlayerEngine';
 
 describe('HlsPlayerEngine', () => {
   let audio: HTMLAudioElement;
-  let hls: { loadSource: ReturnType<typeof vi.fn>; destroy: ReturnType<typeof vi.fn>; attachMedia: ReturnType<typeof vi.fn>; once: ReturnType<typeof vi.fn> };
+  let hls: { loadSource: ReturnType<typeof vi.fn>; destroy: ReturnType<typeof vi.fn>; attachMedia: ReturnType<typeof vi.fn>; once: ReturnType<typeof vi.fn>; on: ReturnType<typeof vi.fn> };
   let service: HlsPlayerEngine;
   let fireMediaAttached: () => void;
+  let fireHlsError: (data: object) => void;
 
   beforeEach(() => {
     audio = document.createElement('audio');
-    hls = { loadSource: vi.fn(), destroy: vi.fn(), attachMedia: vi.fn(), once: vi.fn() };
+    hls = { loadSource: vi.fn(), destroy: vi.fn(), attachMedia: vi.fn(), once: vi.fn(), on: vi.fn() };
     let mediaAttachedHandler: (() => void) | undefined;
+    let hlsErrorHandler: ((_evt: string, data: object) => void) | undefined;
     hls.once.mockImplementation((_event: string, handler: () => void) => {
       mediaAttachedHandler = handler;
     });
-    service = new HlsPlayerEngine(audio, hls);
+    hls.on.mockImplementation((_event: string, handler: (_evt: string, data: object) => void) => {
+      hlsErrorHandler = handler;
+    });
+    service = new HlsPlayerEngine(() => audio, hls);
     fireMediaAttached = () => mediaAttachedHandler!();
+    fireHlsError = (data) => hlsErrorHandler!('hlsError', data);
   });
 
   describe('construction', () => {
@@ -102,6 +108,22 @@ describe('HlsPlayerEngine', () => {
     });
   });
 
+  describe('error handling', () => {
+    it('does not emit playbackStateChanged error for non-fatal HLS errors', () => {
+      const next = vi.fn();
+      service.events$.subscribe(next);
+      fireHlsError({ fatal: false });
+      expect(next).not.toHaveBeenCalledWith({ type: 'playbackStateChanged', state: 'error' });
+    });
+
+    it('emits playbackStateChanged error when a fatal HLS error occurs', () => {
+      const next = vi.fn();
+      service.events$.subscribe(next);
+      fireHlsError({ fatal: true });
+      expect(next).toHaveBeenCalledWith({ type: 'playbackStateChanged', state: 'error' });
+    });
+  });
+
   describe('destroy', () => {
     it('calls destroy on hls when destroyed', () => {
       service.destroy();
@@ -129,6 +151,13 @@ describe('HlsPlayerEngine', () => {
       expect(service.events$).toBeDefined();
     });
 
+    it('emits playbackStateChanged playing when audio playing event fires', () => {
+      const next = vi.fn();
+      service.events$.subscribe(next);
+      audio.dispatchEvent(new Event('playing'));
+      expect(next).toHaveBeenCalledWith({ type: 'playbackStateChanged', state: 'playing' });
+    });
+
     it('emits playbackStateChanged playing when audio play event fires', () => {
       const next = vi.fn();
       service.events$.subscribe(next);
@@ -150,11 +179,20 @@ describe('HlsPlayerEngine', () => {
       expect(next).toHaveBeenCalledWith({ type: 'playbackStateChanged', state: 'ended' });
     });
 
-    it('emits playbackStateChanged buffering when audio waiting event fires', () => {
+    it('emits playbackStateChanged buffering when audio waiting event fires and readyState is 2', () => {
       const next = vi.fn();
       service.events$.subscribe(next);
+      Object.defineProperty(audio, 'readyState', { value: 2, configurable: true });
       audio.dispatchEvent(new Event('waiting'));
       expect(next).toHaveBeenCalledWith({ type: 'playbackStateChanged', state: 'buffering' });
+    });
+
+    it('does not emit buffering when waiting fires but readyState is 3 or higher', () => {
+      const next = vi.fn();
+      service.events$.subscribe(next);
+      Object.defineProperty(audio, 'readyState', { value: 3, configurable: true });
+      audio.dispatchEvent(new Event('waiting'));
+      expect(next).not.toHaveBeenCalledWith({ type: 'playbackStateChanged', state: 'buffering' });
     });
 
     it('emits seeking when audio seeking event fires', () => {

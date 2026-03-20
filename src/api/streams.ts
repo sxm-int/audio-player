@@ -63,4 +63,11 @@ export const streams: StreamItem[] = [
 		isPremium: true,
 		collectedAt: '2025-06-09T13:41:55Z',
 	},
+	{
+		id: 'y7z8ai',
+		title: 'Conan O\'Brien Has a Friend',
+		url: 'https://stitcher.simplecastaudio.com/c945bd13-c7f3-4f22-95b5-4bf98e12b21f/episodes/905037ec-8575-49e9-aee2-fbbbf0557aab/audio/128/default.mp3/default.mp3_ywr3ahjkcgo_d2a37eb71ab252c40cf0a9bc937ddc57_34095110.mp3',
+		isPremium: false,
+		collectedAt: '2026-01-15T16:52:09Z',
+	},
 ];

@@ -1,5 +1,5 @@
-import { useEffect, useRef } from 'react';
-import { setStreams, setCurrentTime, setRequestedTime } from './store';
+import { useEffect } from 'react';
+import { setStreams } from './store';
 import { useAppDispatch } from './hooks';
 import type { StreamItem } from './api/streams';
 
@@ -57,74 +57,3 @@ export const useLoadMocks = () => {
 	}, [dispatch]);
 };
 
-export const useAppAudioRef = ({
-	isPlaying,
-	currentTime,
-	requestedTime,
-}: {
-	isPlaying: boolean;
-	currentTime: number;
-	requestedTime: number | null;
-}): React.RefObject<HTMLAudioElement | null> => {
-	const dispatch = useAppDispatch();
-	const audioElRef = useRef<HTMLAudioElement | null>(null);
-	const playPromiseRef = useRef<Promise<void> | null>(null);
-
-	useEffect(() => {
-		const audio = document.querySelector('audio');
-		audioElRef.current = audio as HTMLAudioElement | null;
-		if (!audio) return;
-
-		// Only call play/pause if audio element state doesn't match desired state
-		// This prevents circular loops with the audio event listeners
-		if (isPlaying && audio.paused) {
-			playPromiseRef.current = audio.play().catch((err) => {
-				console.error('Play failed:', err);
-				playPromiseRef.current = null;
-			});
-		} else if (!isPlaying && !audio.paused) {
-			// Wait for any pending play promise to resolve before pausing
-			if (playPromiseRef.current) {
-				playPromiseRef.current
-					.then(() => {
-						playPromiseRef.current = null;
-						if (!audio.paused) {
-							audio.pause();
-						}
-					})
-					.catch(() => {
-						playPromiseRef.current = null;
-					});
-			} else {
-				audio.pause();
-			}
-		}
-	}, [isPlaying]);
-
-	useEffect(() => {
-		const a = audioElRef.current;
-		if (!a || requestedTime == null) return;
-		try {
-			a.currentTime = requestedTime;
-		} catch (err) {
-			console.error('Seek failed:', err);
-		} finally {
-			dispatch(setRequestedTime(null));
-		}
-	}, [requestedTime, dispatch]);
-
-	useEffect(() => {
-		const a = audioElRef.current;
-		if (!a) return;
-		if (!isFinite(a.duration) && currentTime === Number.MAX_SAFE_INTEGER) {
-			try {
-				a.currentTime = a.seekable.end(a.seekable.length - 1) - 0.5;
-			} catch (err) {
-				console.warn('Failed to jump to live edge:', err);
-			}
-			dispatch(setCurrentTime(0));
-		}
-	}, [currentTime, dispatch]);
-
-	return audioElRef;
-};

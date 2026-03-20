@@ -1,82 +1,85 @@
 // src/components/Controls.tsx
 import React from 'react';
-import { useAppDispatch, useAppSelector } from '../hooks';
-import { setMuted, setPlaying, setVolume, setRequestedTime } from '../store';
+import { useAppSelector } from '../hooks';
 import { formatTime } from '../lib/format';
+import { usePlaybackService } from '../playback-service/PlaybackServiceContext';
 
 const Controls: React.FC = () => {
-	const { isPlaying, muted, volume, currentTime, duration, isLive, status } =
-		useAppSelector((s) => s.player);
-	const dispatch = useAppDispatch();
+  const { playbackState, muted, volume, currentTime, duration } =
+    useAppSelector((s) => s.player);
+  const service = usePlaybackService();
 
-	// Local scrub state so we don't seek continuously during drag
-	const [scrub, setScrub] = React.useState<number | null>(null);
+  // Local scrub state so we don't seek continuously during drag
+  const [scrub, setScrub] = React.useState<number | null>(null);
+  const dragging = React.useRef(false);
+  const seekPending = React.useRef(false);
 
-	const commitScrub = React.useCallback(() => {
-		if (scrub != null) {
-			dispatch(setRequestedTime(scrub));
-			setScrub(null);
-		}
-	}, [dispatch, scrub]);
+  const commitScrub = React.useCallback(() => {
+    dragging.current = false;
+    if (scrub != null) {
+      seekPending.current = true;
+      service.seek(scrub);
+    }
+  }, [service, scrub]);
 
-	return (
-		<div className="controls">
-			<div className="row">
-				<button
-					className="btn"
-					onClick={() => dispatch(setPlaying(!isPlaying))}
-				>
-					{isPlaying ? 'Pause' : 'Play'}
-				</button>
+  React.useEffect(() => {
+    if (seekPending.current) {
+      seekPending.current = false;
+      setScrub(null);
+    }
+  }, [currentTime]);
 
-				<button className="btn" onClick={() => dispatch(setMuted(!muted))}>
-					{muted ? 'Unmute' : 'Mute'}
-				</button>
+  return (
+    <div className="controls">
+      <div className="row">
 
-				<label className="volume">
-					Volume
-					<input
-						type="range"
-						min={0}
-						max={1}
-						step={0.01}
-						value={volume}
-						onChange={(e) => dispatch(setVolume(parseFloat(e.target.value)))}
-					/>
-				</label>
+        {(playbackState === 'paused' || playbackState === 'ended') && (
+          <button className="btn" onClick={() => service.play()}>Play</button>
+        )}
 
-				<span className="status">{status}</span>
-			</div>
+        {(playbackState === 'playing' || playbackState === 'buffering') && (
+          <button className="btn" onClick={() => service.pause()}>Pause</button>
+        )}
 
-			<div className="row">
-				<div className="time">{formatTime(currentTime)}</div>
+        <label className="volume">
+          Volume
+          <input type="range" min={0} max={1} step={0.01} value={volume} onChange={(e) => service.setVolume(parseFloat(e.target.value))} />
+        </label>
 
-				<input
-					className="seek"
-					type="range"
-					min={0}
-					max={isFinite(duration) ? duration : 0}
-					step={0.1}
-					value={isFinite(duration) ? (scrub ?? currentTime) : 0}
-					onChange={(e) => setScrub(parseFloat(e.target.value))}
-					onMouseUp={commitScrub}
-					onTouchEnd={commitScrub}
-					disabled={!isFinite(duration)}
-				/>
+        {(!muted) && (
+          <button className="btn" onClick={() => service.setMuted(true)}>Mute</button>
+        )}
 
-				<div className="time">{formatTime(duration)}</div>
+        {(muted) && (
+          <button className="btn" onClick={() => service.setMuted(false)}>Unmute</button>
+        )}
 
-				{isLive && (
-					<button
-						className="btn"
-						onClick={() => dispatch(setRequestedTime(Number.MAX_SAFE_INTEGER))}
-					>
-						Live
-					</button>
-				)}
-			</div>
-		</div>
-	);
+        <span className="status">{playbackState}</span>
+      </div>
+
+      <div className="row">
+        <div className="time">{formatTime(currentTime)}</div>
+
+        <input
+          className="seek"
+          type="range"
+          min={0}
+          max={isFinite(duration) ? duration : 0}
+          step={0.1}
+          value={isFinite(duration) ? (scrub ?? currentTime) : 0}
+          onMouseDown={() => { dragging.current = true; }}
+          onTouchStart={() => { dragging.current = true; }}
+          onChange={(e) => { if (dragging.current) setScrub(parseFloat(e.target.value)); }}
+          onMouseUp={commitScrub}
+          onTouchEnd={commitScrub}
+          disabled={!isFinite(duration)}
+        />
+
+        <div className="time">{formatTime(duration)}</div>
+
+      </div>
+    </div>
+  );
 };
 
 export default Controls;

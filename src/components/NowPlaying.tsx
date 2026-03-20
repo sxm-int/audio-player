@@ -1,40 +1,34 @@
 import React from 'react';
-
-import HlsAudio from './HlsAudio';
+import { useAppSelector } from '../hooks';
 import Controls from './Controls';
 import Visualizer from './Visualizer';
 
-type NowPlaying = {
-	url: string;
-	title?: string;
-};
+const NowPlaying: React.FC = () => {
+  const { url, title, playbackState } = useAppSelector((s) => s.player);
 
-const NowPlaying: React.FC<NowPlaying> = ({
-	url,
-	title = 'Now Playing',
-}) => {
-	return (
-		<>
-			<div className="now">
-				<div className="viz-card">
-					<Visualizer height={140} fftSize={2048} />
-				</div>
-				<div className="meta">
-					<h1 className="now-title">
-						{title}
-					</h1>
-					<div className="now-url" title={url}>
-						{url}
-					</div>
-				</div>
-			</div>
+  return (
+    <>
+      <div className="now">
+        <div className="viz-card">
+          <Visualizer height={140} fftSize={2048} />
+        </div>
+        <div className="meta">
+          <h1 className="now-title">{title}</h1>
+          <div className="now-url" title={url}>{url}</div>
+        </div>
+      </div>
 
-			<div className="card">
-				<HlsAudio />
-				<Controls />
-			</div>
-		</>
-	);
+      {playbackState === 'error' && (
+        <div className="card">Content Unavailable</div>
+      )}
+
+      {playbackState !== 'idle' && playbackState !== 'error' && (
+        <div className="card">
+          <Controls />
+        </div>
+      )}
+    </>
+  );
 };
 
 export default NowPlaying;

@@ -13,11 +13,11 @@ export class HlsPlayerEngine implements IMediaPlayer {
   private destroy$ = new Subject<void>();
   readonly events$ = new Subject<PlaybackEvent>();
 
-  constructor(audio: HTMLAudioElement, hls: IHls) {
-    this.audio = audio;
+  constructor(getAudio: () => HTMLAudioElement, hls: IHls) {
+    this.audio = getAudio();
     this.hls = hls;
-    this.setupHls(hls, audio);
-    this.setupAudioEvents(audio);
+    this.setupHls(hls, this.audio);
+    this.setupAudioEvents(this.audio);
   }
 
   private emitInitialState(): void {
@@ -34,10 +34,18 @@ export class HlsPlayerEngine implements IMediaPlayer {
       this.pendingUrl = null;
     });
     hls.attachMedia(audio);
+    hls.on('hlsError', (_evt, data) => {
+      if (data.fatal) {
+        this.events$.next({ type: 'playbackStateChanged', state: 'error' });
+      }
+    });
   }
 
   private setupAudioEvents(audio: HTMLAudioElement): void {
     fromEvent(audio, 'play').pipe(takeUntil(this.destroy$))
+      .subscribe(() => this.events$.next({ type: 'playbackStateChanged', state: 'playing' }));
+
+    fromEvent(audio, 'playing').pipe(takeUntil(this.destroy$))
       .subscribe(() => this.events$.next({ type: 'playbackStateChanged', state: 'playing' }));
 
     fromEvent(audio, 'pause').pipe(takeUntil(this.destroy$))
@@ -47,7 +55,11 @@ export class HlsPlayerEngine implements IMediaPlayer {
       .subscribe(() => this.events$.next({ type: 'playbackStateChanged', state: 'ended' }));
 
     fromEvent(audio, 'waiting').pipe(takeUntil(this.destroy$))
-      .subscribe(() => this.events$.next({ type: 'playbackStateChanged', state: 'buffering' }));
+      .subscribe(() => {
+        if (audio.readyState < 3) {
+          this.events$.next({ type: 'playbackStateChanged', state: 'buffering' });
+        }
+      });
 
     fromEvent(audio, 'timeupdate').pipe(takeUntil(this.destroy$))
       .subscribe(() => this.events$.next({ type: 'currentTimeChanged', currentTime: audio.currentTime }));

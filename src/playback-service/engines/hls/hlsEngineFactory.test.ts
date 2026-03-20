@@ -7,6 +7,7 @@ vi.mock('hls.js', () => ({
     attachMedia: vi.fn(),
     loadSource: vi.fn(),
     once: vi.fn(),
+    on: vi.fn(),
     destroy: vi.fn(),
   })),
 }));
@@ -14,6 +15,6 @@ vi.mock('hls.js', () => ({
 describe('hlsEngineFactory', () => {
   it('returns an HlsPlayerEngine', () => {
     const audio = document.createElement('audio');
-    expect(hlsEngineFactory(audio)).toBeInstanceOf(HlsPlayerEngine);
+    expect(hlsEngineFactory(() => audio)).toBeInstanceOf(HlsPlayerEngine);
   });
 });

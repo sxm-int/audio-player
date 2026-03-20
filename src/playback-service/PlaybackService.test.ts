@@ -4,7 +4,6 @@ import { PlaybackService } from './PlaybackService';
 import type { PlaybackItem, PlaybackEvent } from './PlaybackTypes';
 
 const makeEngine = () => ({ load: vi.fn(), destroy: vi.fn(), play: vi.fn(), pause: vi.fn(), seek: vi.fn(), setVolume: vi.fn(), setMuted: vi.fn(), events$: new Subject<PlaybackEvent>() });
-const audio = {} as HTMLAudioElement;
 
 describe('PlaybackService', () => {
   const item: PlaybackItem = { id: '1', title: 'Test', url: 'https://example.com/stream.m3u8' };
@@ -14,7 +13,7 @@ describe('PlaybackService', () => {
 
   beforeEach(() => {
     engine = makeEngine();
-    service = new PlaybackService(audio, vi.fn().mockReturnValue(engine));
+    service = new PlaybackService([[() => true, vi.fn().mockReturnValue(engine), () => ({} as HTMLAudioElement)]]);
     service.tune(item);
   });
 
@@ -23,10 +22,17 @@ describe('PlaybackService', () => {
       expect(engine.load).toHaveBeenCalledWith(item.url);
     });
 
+    it('emits a mediaChanged event with the url', () => {
+      const received: unknown[] = [];
+      service.events$.subscribe(e => received.push(e));
+      service.tune(item);
+      expect(received).toContainEqual({ type: 'mediaChanged', url: item.url, title: item.title });
+    });
+
     it('destroys the previous engine when called again', () => {
       const engine2 = makeEngine();
       const factory = vi.fn().mockReturnValueOnce(engine).mockReturnValueOnce(engine2);
-      const s = new PlaybackService(audio, factory);
+      const s = new PlaybackService([[() => true, factory, () => ({} as HTMLAudioElement)]]);
       s.tune(item);
       s.tune(item);
       expect(engine.destroy).toHaveBeenCalled();
@@ -71,7 +77,7 @@ describe('PlaybackService', () => {
     it('forwards events from the new engine after re-tuning', () => {
       const engine2 = makeEngine();
       const factory = vi.fn().mockReturnValueOnce(engine).mockReturnValueOnce(engine2);
-      const s = new PlaybackService(audio, factory);
+      const s = new PlaybackService([[() => true, factory, () => ({} as HTMLAudioElement)]]);
       s.tune(item);
       s.tune(item);
       const received: unknown[] = [];

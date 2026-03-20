@@ -2,6 +2,6 @@ import Hls from 'hls.js';
 import type { EngineFactory } from '../../IMediaPlayer';
 import { HlsPlayerEngine } from './HlsPlayerEngine';
 
-export const hlsEngineFactory: EngineFactory = (audio) => {
-  return new HlsPlayerEngine(audio, new Hls());
+export const hlsEngineFactory: EngineFactory = (getAudio) => {
+  return new HlsPlayerEngine(getAudio, new Hls());
 };
